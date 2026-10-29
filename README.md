@@ -9,10 +9,10 @@
 
 | 폴더 | 이름 | 담당 파트 | GitHub |
 |---|---|---|---|
-| `members/member1` | 한웅 | AI | |
-| `members/member2` | 유나 | 로봇·HW | |
-| `members/member3` | 채웅 | 웹사이트 | |
-| `members/member4` | 채연 | 앱 및 발표 | |
+| `members/member1` | 한웅 | AI | @gksdnd0519-commits |
+| `members/member2` | 유나 (팀장) | 로봇·HW | @una8860-rgb |
+| `members/member3` | 채웅 | 웹사이트 | @chaechaechae99 |
+| `members/member4` | 채연 | 앱 및 발표 | @kangchaeyeon82 |
 
 ## 📁 폴더 구조
 
