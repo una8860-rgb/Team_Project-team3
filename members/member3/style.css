@@ -1,0 +1,41 @@
+/* 내 페이지 스타일 — 자유롭게 꾸며주세요. */
+:root {
+  --accent: #ea580c;
+  --bg: #f8fafc;
+  --text: #0f172a;
+  --muted: #64748b;
+  --line: #e2e8f0;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+}
+
+nav { padding: 12px 16px; }
+nav a { color: var(--muted); text-decoration: none; }
+nav a:hover { color: var(--accent); }
+
+header { padding: 32px 16px; text-align: center; border-bottom: 4px solid var(--accent); }
+header h1 { margin: 0; }
+header .role { margin: 4px 0 0; color: var(--muted); }
+
+main { max-width: 760px; margin: 0 auto; padding: 24px 16px 64px; }
+section { margin-bottom: 32px; }
+section h2 { font-size: 1.2rem; color: var(--accent); }
+
+.todo { list-style: none; padding: 0; }
+.todo li::before { content: "⬜ "; }
+.todo li.done::before { content: "✅ "; }
+.todo li.done { color: var(--muted); text-decoration: line-through; }
+
+.log { padding: 12px 16px; margin-bottom: 12px; background: #fff; border-left: 4px solid var(--accent); border-radius: 8px; }
+.log time { font-size: 0.85rem; color: var(--muted); }
+.log p { margin: 4px 0 0; }
+
+code { background: #e2e8f0; padding: 1px 6px; border-radius: 4px; }
