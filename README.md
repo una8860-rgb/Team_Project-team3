@@ -87,3 +87,13 @@ PR 내용을 확인하고 문제가 없으면 **Merge pull request**. merge 된 
 
 GitHub 저장소 → **Settings → Pages** → Branch 를 `main` / `/ (root)` 로 저장하면
 `https://una8860-rgb.github.io/Team_Project-team3/` 에서 사이트가 열립니다.
+
+## 🚫 올리면 안 되는 파일
+
+레포가 **공개(Public)** 라 누구나 볼 수 있습니다. `.gitignore` 에 아래 파일들이 자동 제외되도록 설정되어 있습니다.
+
+- **비밀 정보**: 비밀번호, API 키, Wi-Fi 비밀번호 → `.env` 파일에 넣기 (예시는 `.env.example` 로 공유)
+- **AI 모델·영상 파일** (`.pt`, `.onnx`, `.mp4` 등): 용량이 커서 GitHub 에 안 올라감 → Google Drive 로 공유하고 링크만 남기기
+- **자동 생성 폴더**: `venv/`, `__pycache__/`, `node_modules/`
+
+> 로봇 인사 음성(`.mp3`, `.wav`)처럼 작은 파일은 올려도 괜찮습니다.

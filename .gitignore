@@ -1,0 +1,47 @@
+# ── 비밀 정보 (절대 올리지 않기) ──
+.env
+.env.*
+!.env.example
+*secret*
+*.key
+*.pem
+config.local.*
+
+# ── Python ──
+__pycache__/
+*.pyc
+venv/
+.venv/
+env/
+
+# ── Node / 웹 · 앱 ──
+node_modules/
+dist/
+build/
+.expo/
+
+# ── AI 모델 · 데이터 (용량 큼 → 공유는 Google Drive 등으로) ──
+*.pt
+*.pth
+*.onnx
+*.h5
+*.tflite
+*.weights
+datasets/
+
+# ── 영상 · 녹화 (시연 영상은 Drive로) ──
+*.mp4
+*.mov
+*.avi
+
+# ── 데이터베이스 · 로그 ──
+*.db
+*.sqlite3
+*.log
+
+# ── 에디터 · OS ──
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
