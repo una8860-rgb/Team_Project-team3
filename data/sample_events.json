@@ -1,0 +1,6 @@
+[
+  { "id": 1, "type": "person_detected", "timestamp": "2026-11-02T14:03:21+09:00", "confidence": 0.87 },
+  { "id": 2, "type": "person_left", "timestamp": "2026-11-02T14:03:40+09:00", "confidence": null },
+  { "id": 3, "type": "person_detected", "timestamp": "2026-11-02T14:10:05+09:00", "confidence": 0.92 },
+  { "id": 4, "type": "person_left", "timestamp": "2026-11-02T14:10:31+09:00", "confidence": null }
+]
