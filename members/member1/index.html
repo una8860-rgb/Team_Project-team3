@@ -10,39 +10,81 @@
 <body>
   <nav><a href="../../index.html">← <span data-project-name>프로젝트</span> 홈</a></nav>
 
-  <header>
-    <h1>🧠 한웅</h1>
-    <p class="role">담당 파트: AI</p>
+  <!-- 경기장 컨셉 헤더 -->
+  <header class="pitch-hero">
+    <div class="pitch-lines" aria-hidden="true">
+      <span class="halfway"></span>
+      <span class="center-circle"></span>
+      <span class="box box-left"></span>
+      <span class="box box-right"></span>
+    </div>
+
+    <div class="scoreboard">
+      <span class="kit">1</span>
+      <div>
+        <h1>한웅</h1>
+        <p class="role">포지션: AI · 축구를 좋아하는 팀원</p>
+      </div>
+    </div>
+    <span class="ball" aria-hidden="true">⚽</span>
   </header>
 
   <main>
-    <section>
-      <h2>📌 담당 파트 소개</h2>
-      <p>내가 맡은 부분이 무엇이고, 프로젝트에서 어떤 역할을 하는지 적어주세요.</p>
+    <section class="card">
+      <h2><span class="tag">KICK OFF</span> 담당 파트 소개</h2>
+      <p>
+        팀에서 <strong>AI</strong>를 맡고 있어요. 축구에서 공격수가 골 찬스를 놓치지 않듯,
+        PC 앞에 누군가 다가오는 순간을 놓치지 않고 감지하는 것이 제 역할입니다.
+      </p>
     </section>
 
-    <section>
-      <h2>✅ 할 일</h2>
+    <section class="card">
+      <h2><span class="tag">MATCH PLAN</span> 할 일</h2>
       <ul class="todo">
         <li class="done">작업공간 만들기</li>
+        <li class="done">축구 컨셉으로 페이지 꾸미기</li>
         <li>할 일 1</li>
         <li>할 일 2</li>
       </ul>
     </section>
 
-    <section>
-      <h2>📝 진행 기록</h2>
+    <section class="card">
+      <h2><span class="tag">LINE-UP</span> 우리 팀 라인업</h2>
+      <div class="lineup">
+        <div class="player captain" style="--x: 50%; --y: 18%">
+          <span class="dot">2</span><b>유나</b><small>주장 · 로봇·HW</small>
+        </div>
+        <div class="player" style="--x: 22%; --y: 50%">
+          <span class="dot">3</span><b>채웅</b><small>웹사이트</small>
+        </div>
+        <div class="player me" style="--x: 78%; --y: 50%">
+          <span class="dot">1</span><b>한웅</b><small>AI</small>
+        </div>
+        <div class="player" style="--x: 50%; --y: 80%">
+          <span class="dot">4</span><b>채연</b><small>앱 및 발표</small>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2><span class="tag">MATCH LOG</span> 진행 기록</h2>
+      <article class="log">
+        <time>2026-10-30</time>
+        <p>축구 경기장 컨셉으로 내 작업 페이지를 꾸몄다.</p>
+      </article>
       <article class="log">
         <time>2026-10-29</time>
-        <p>오늘 한 일, 막힌 부분, 다음에 할 일을 적어주세요.</p>
+        <p>프로젝트 주제와 역할 확정. AI 파트를 맡았다.</p>
       </article>
     </section>
 
-    <section>
-      <h2>📦 결과물</h2>
+    <section class="card">
+      <h2><span class="tag">FULL TIME</span> 결과물</h2>
       <p>코드는 <code>src/</code> 폴더에, 사진은 <code>images/</code> 폴더에 넣고 여기에 링크해주세요.</p>
       <!-- 예: <img src="images/사진.jpg" alt="설명"> -->
     </section>
   </main>
+
+  <footer>⚽ 한웅 · 등번호 1</footer>
 </body>
 </html>
