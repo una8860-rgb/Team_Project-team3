@@ -1,0 +1,28 @@
+# 개인 파일
+CLAUDE.local.md
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# Node (앱·웹을 Node로 만들 경우)
+node_modules/
+
+# 큰 파일 (Google Drive로 공유)
+*.pt
+*.pth
+*.onnx
+*.mp4
+*.mov
+
+# 에디터·OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+desktop.ini
