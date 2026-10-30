@@ -11,7 +11,7 @@ const PROJECT = {
   ],
 };
 
-// 팀원 정보는 각자 members/내폴더/info.js 에서 registerMember(...) 로 등록합니다.
+// 팀원 정보는 각자 docs/team/members/내폴더/info.js 에서 registerMember(...) 로 등록합니다.
 const MEMBERS = [];
 function registerMember(info) {
   MEMBERS.push(info);

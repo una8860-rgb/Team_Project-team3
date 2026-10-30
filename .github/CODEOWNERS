@@ -1,9 +1,22 @@
 # 파일별 담당자 — PR 이 열리면 담당자에게 자동으로 리뷰 요청이 갑니다.
 # 기본(공용 파일): 팀장
-*                   @una8860-rgb
+*                                   @una8860-rgb
 
-# 팀원 작업공간
-/members/member1/   @gksdnd0519-commits
-/members/member2/   @una8860-rgb
-/members/member3/   @chaechaechae99
-/members/member4/   @kangchaeyeon82
+# 모듈 코드
+/src/ai/                            @gksdnd0519-commits
+/src/robot/                         @una8860-rgb
+/src/server/                        @chaechaechae99
+/src/web/                           @chaechaechae99
+/src/app/                           @kangchaeyeon82
+
+# 마일스톤
+/docs/milestones/M1-ai-detection.md @gksdnd0519-commits
+/docs/milestones/M2-robot-greet.md  @una8860-rgb
+/docs/milestones/M3-web-server.md   @chaechaechae99
+/docs/milestones/M4-app.md          @kangchaeyeon82
+
+# 팀원 소개 페이지
+/docs/team/members/member1/         @gksdnd0519-commits
+/docs/team/members/member2/         @una8860-rgb
+/docs/team/members/member3/         @chaechaechae99
+/docs/team/members/member4/         @kangchaeyeon82
