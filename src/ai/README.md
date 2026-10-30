@@ -5,4 +5,4 @@
 - 보내는 것: `POST /api/events` — 규격은 `docs/design.md` ①
 - 기준: 2초 이상 보이면 `person_detected`, 3초 이상 안 보이면 `person_left` (각 1번만)
 - 서버가 없을 때: 보낼 JSON을 콘솔에 출력하는 테스트 모드
-- 마일스톤: `docs/milestones/M1-ai-detection.md`
+- 마일스톤: `docs/milestones/M1-ai-server.md`

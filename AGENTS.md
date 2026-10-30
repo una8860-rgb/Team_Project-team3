@@ -15,9 +15,9 @@
 
 | 폴더 | 담당 |
 |---|---|
-| `src/ai/`, `docs/milestones/M1-ai-detection.md` | 한웅 |
+| `src/ai/`, `src/server/`, `docs/milestones/M1-ai-server.md` | 한웅 |
 | `src/robot/`, `reference/`, `docs/milestones/M2-robot-greet.md` | 유나 |
-| `src/server/`, `src/web/`, `docs/milestones/M3-web-server.md` | 채웅 |
+| `src/web/`, `docs/milestones/M3-web.md` | 채웅 |
 | `src/app/`, `docs/milestones/M4-app.md` | 채연 |
 | `src/common/`, `docs/design.md`, `requirements.txt` | 공용 — **수정은 PR로 팀 합의** |
 | 그 외 (`README.md`, `AGENTS.md`, `docs/` 나머지) | 팀장(유나) |

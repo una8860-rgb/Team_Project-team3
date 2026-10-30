@@ -5,7 +5,7 @@
 
 ## 11/2 할 일
 - [ ] 모든 기기를 같은 핫스팟에 연결 (핫스팟 담당: 미정)
-- [ ] 채웅이 서버 노트북 IP를 단톡에 공유 → 각자 `SERVER_HOST` 설정
+- [ ] 한웅이 서버 노트북 IP를 단톡에 공유 → 각자 `SERVER_HOST` 설정
 - [ ] 연결 확인: `GET /health` (로봇), `GET /api/status` (서버)
 - [ ] 시연 시나리오 6단계 통합 테스트 (`docs/requirements.md`)
 - [ ] 시연 영상 촬영 (Google Drive 보관)

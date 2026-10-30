@@ -8,9 +8,9 @@
 
 | 이름 | 담당 | 코드 폴더 | 마일스톤 | GitHub |
 |---|---|---|---|---|
-| 한웅 | AI 사람 감지 | `src/ai/` | [M1](docs/milestones/M1-ai-detection.md) | @gksdnd0519-commits |
+| 한웅 | AI 사람 감지 + 중앙 서버 | `src/ai/`, `src/server/` | [M1](docs/milestones/M1-ai-server.md) | @gksdnd0519-commits |
 | 유나 (팀장) | 로봇·HW | `src/robot/` | [M2](docs/milestones/M2-robot-greet.md) | @una8860-rgb |
-| 채웅 | 웹 서버·화면 | `src/server/`, `src/web/` | [M3](docs/milestones/M3-web-server.md) | @chaechaechae99 |
+| 채웅 | 웹 화면·대시보드 | `src/web/` | [M3](docs/milestones/M3-web.md) | @chaechaechae99 |
 | 채연 | 앱 · 발표 | `src/app/` | [M4](docs/milestones/M4-app.md) | @kangchaeyeon82 |
 
 ## 📁 폴더 구조
@@ -25,7 +25,7 @@ src/                 소스 코드
   common/            공용 상수·함수 (protocol.py: 포트, 이벤트 이름 등)
   ai/                AI 사람 감지          ← 한웅
   robot/             라즈봇 인사 서버      ← 유나
-  server/            중앙 서버             ← 채웅
+  server/            중앙 서버             ← 한웅
   web/               웹 화면·대시보드      ← 채웅
   app/               앱                    ← 채연
 data/                샘플 데이터 (혼자 개발할 때 쓰는 가짜 데이터)
