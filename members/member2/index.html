@@ -10,39 +10,134 @@
 <body>
   <nav><a href="../../index.html">← <span data-project-name>프로젝트</span> 홈</a></nav>
 
-  <header>
-    <h1>🦾 유나</h1>
-    <p class="role">담당 파트: 로봇·HW</p>
+  <header class="hero">
+    <!-- 마우스를 올리면 고개 숙여 인사하는 로봇 -->
+    <div class="robot" title="마우스를 올려보세요">
+      <div class="bubble">안녕하십니까 팀장님!</div>
+      <svg viewBox="0 0 240 280" aria-label="인사하는 로봇">
+        <defs>
+          <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+            <feGaussianBlur stdDeviation="2.5" result="b" />
+            <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+          </filter>
+          <linearGradient id="shell" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stop-color="#ffffff" />
+            <stop offset="1" stop-color="#e5e5e5" />
+          </linearGradient>
+        </defs>
+
+        <!-- 바닥 그림자 -->
+        <ellipse cx="120" cy="270" rx="58" ry="7" fill="#000" opacity="0.45" />
+
+        <!-- 팔 (왼쪽은 고정, 오른쪽은 인사할 때 흔들기) -->
+        <rect x="52" y="190" width="22" height="46" rx="11" fill="url(#shell)" stroke="#0a0a0a" stroke-width="3" transform="rotate(14 64 194)" />
+        <g class="arm-r">
+          <rect x="166" y="190" width="22" height="46" rx="11" fill="url(#shell)" stroke="#0a0a0a" stroke-width="3" transform="rotate(-14 176 194)" />
+        </g>
+
+        <!-- 몸통 -->
+        <rect x="70" y="176" width="100" height="84" rx="34" fill="#1a1a1a" stroke="#f5f5f5" stroke-width="3" />
+        <path class="heart" d="M120 230 C108 220 102 214 102 207 C102 201 107 197 112 197 C116 197 119 199 120 202 C121 199 124 197 128 197 C133 197 138 201 138 207 C138 214 132 220 120 230 Z"
+              fill="#facc15" filter="url(#glow)" />
+        <!-- 바퀴 -->
+        <rect x="80" y="254" width="26" height="14" rx="7" fill="#404040" />
+        <rect x="134" y="254" width="26" height="14" rx="7" fill="#404040" />
+
+        <!-- 카메라 받침대 (목) -->
+        <path d="M100 160 V174 H140 V160" fill="none" stroke="#f5f5f5" stroke-width="5" stroke-linejoin="round" stroke-linecap="round" />
+
+        <!-- 머리: 목(받침대)을 기준으로 숙임 -->
+        <g class="head">
+          <line x1="120" y1="34" x2="120" y2="16" stroke="#f5f5f5" stroke-width="3" stroke-linecap="round" />
+          <circle class="antenna-ball" cx="120" cy="12" r="7" fill="#facc15" filter="url(#glow)" />
+          <!-- 귀 (서보 축) -->
+          <circle cx="36" cy="104" r="11" fill="#facc15" stroke="#0a0a0a" stroke-width="3" />
+          <circle cx="204" cy="104" r="11" fill="#facc15" stroke="#0a0a0a" stroke-width="3" />
+          <rect x="38" y="34" width="164" height="130" rx="60" fill="url(#shell)" stroke="#0a0a0a" stroke-width="3" />
+          <!-- 얼굴 화면 -->
+          <rect x="58" y="58" width="124" height="80" rx="38" fill="#0a0a0a" />
+          <g class="eyes-open" filter="url(#glow)">
+            <circle cx="96" cy="94" r="13" fill="#facc15" />
+            <circle cx="144" cy="94" r="13" fill="#facc15" />
+            <circle cx="101" cy="89" r="4" fill="#fff" />
+            <circle cx="149" cy="89" r="4" fill="#fff" />
+          </g>
+          <path class="eyes-happy" d="M84 98 Q96 82 108 98 M132 98 Q144 82 156 98"
+                fill="none" stroke="#facc15" stroke-width="5" stroke-linecap="round" filter="url(#glow)" />
+          <path d="M112 118 Q120 125 128 118" fill="none" stroke="#facc15" stroke-width="3" stroke-linecap="round" />
+          <!-- 볼 -->
+          <ellipse cx="74" cy="146" rx="10" ry="6" fill="#facc15" opacity="0.45" />
+          <ellipse cx="166" cy="146" rx="10" ry="6" fill="#facc15" opacity="0.45" />
+        </g>
+      </svg>
+    </div>
+
+    <div class="nameplate">
+      <span class="tag">M2 · TEAM LEADER</span>
+      <h1>유나</h1>
+      <p class="role">ROBOT <span>/</span> HARDWARE</p>
+      <p class="desc">신호가 오면, 로봇이 움직인다.</p>
+    </div>
   </header>
 
   <main>
-    <section>
-      <h2>📌 담당 파트 소개</h2>
-      <p>내가 맡은 부분이 무엇이고, 프로젝트에서 어떤 역할을 하는지 적어주세요.</p>
+    <section class="card">
+      <h2><span class="num">01</span> 담당 파트 소개</h2>
+      <p>
+        AI가 사람을 감지하면, 그 신호를 받아 <strong>라즈봇이 고개 숙여 인사</strong>하도록 만드는 것이 제 역할이에요.
+        눈에 보이는 "움직임"을 책임지는 하드웨어 담당입니다.
+      </p>
+      <div class="duties">
+        <article class="duty">
+          <span class="label">CONTROL</span>
+          <h3>라즈봇 제어</h3>
+          <p>카메라 받침대 서보모터로 인사 동작 구현, 인사 음성 출력</p>
+        </article>
+        <article class="duty">
+          <span class="label">CIRCUIT · FIRMWARE</span>
+          <h3>회로 및 펌웨어 개발</h3>
+          <p>모터·스피커 배선, 감지 신호를 받아 동작하는 로봇 프로그램</p>
+        </article>
+        <article class="duty">
+          <span class="label">KIT</span>
+          <h3>키트 보관·관리</h3>
+          <p>라즈봇 키트·부품 보관, 배터리 충전, 시연 당일 장비 챙기기</p>
+        </article>
+      </div>
     </section>
 
-    <section>
-      <h2>✅ 할 일</h2>
+    <section class="card">
+      <h2><span class="num">02</span> 할 일</h2>
       <ul class="todo">
         <li class="done">작업공간 만들기</li>
-        <li>할 일 1</li>
-        <li>할 일 2</li>
+        <li class="done">로봇 컨셉으로 페이지 꾸미기</li>
+        <li>라즈봇 부팅 · Wi-Fi 연결 · 노트북에서 원격 접속</li>
+        <li>카메라 받침대 상하 회전 테스트 (각도 메모)</li>
+        <li>인사 동작 만들기: 기본 → 숙이기 → 1초 정지 → 원위치</li>
+        <li>"안녕하십니까 팀장님!" 음성 녹음 · 스피커 재생</li>
+        <li>신호를 받으면 인사하는 로봇 서버 (<code>POST /greet</code>)</li>
       </ul>
     </section>
 
-    <section>
-      <h2>📝 진행 기록</h2>
+    <section class="card">
+      <h2><span class="num">03</span> 진행 기록</h2>
+      <article class="log">
+        <time>2026-10-30</time>
+        <p>로봇 컨셉으로 작업 페이지를 꾸몄다. 모듈 간 통신 규격 초안을 작성했다.</p>
+      </article>
       <article class="log">
         <time>2026-10-29</time>
-        <p>오늘 한 일, 막힌 부분, 다음에 할 일을 적어주세요.</p>
+        <p>프로젝트 주제와 역할 확정. 로봇·HW 파트를 맡았다.</p>
       </article>
     </section>
 
-    <section>
-      <h2>📦 결과물</h2>
-      <p>코드는 <code>src/</code> 폴더에, 사진은 <code>images/</code> 폴더에 넣고 여기에 링크해주세요.</p>
-      <!-- 예: <img src="images/사진.jpg" alt="설명"> -->
+    <section class="card">
+      <h2><span class="num">04</span> 결과물</h2>
+      <p>코드는 <code>src/</code> 폴더에, 사진은 <code>images/</code> 폴더에 넣고 여기에 링크할 예정이에요.</p>
+      <!-- 예: <img src="images/robot.jpg" alt="라즈봇 사진"> -->
     </section>
   </main>
+
+  <footer>POWERED BY RASPBOT</footer>
 </body>
 </html>

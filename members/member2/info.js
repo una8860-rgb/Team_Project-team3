@@ -6,5 +6,5 @@ registerMember({
   role: "로봇·HW",
   emoji: "🦾",
   color: "#16a34a",
-  status: "준비 중",
+  status: "진행 중",
 });
