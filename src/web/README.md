@@ -4,4 +4,4 @@
 
 - 0.5초마다 `GET /api/status` 확인 → `present` 면 엑셀 화면, `absent` 면 원래 화면
 - 서버가 없을 때: `data/sample_status.json` 같은 고정값으로 화면 개발
-- 규격: `docs/design.md` ③ / 마일스톤: `docs/milestones/M3-web-server.md`
+- 규격: `docs/design.md` ③ / 마일스톤: `docs/milestones/M3-web.md`
