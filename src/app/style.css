@@ -1,0 +1,153 @@
+/* 언더커버 앱 스타일 — 화면 설계: src/app/SCREEN.md 8번 */
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css");
+
+:root {
+  --ink: #111111;
+  --sub: #5F6368;
+  --line: #ECECEC;
+  --blue: #2457D6;
+  --green: #1E7A4C;
+  --green-bg: #E3F2EA;
+  --green-ink: #14532D;
+  --orange: #D9480F;
+  --orange-bg: #FDE3D3;
+  --orange-ink: #7C2D12;
+  --past-bg: #F1F3F4;
+  --past-edge: #9AA0A6;
+}
+
+/* 페이지 바탕: 핸드폰 폭, Streamlit 기본 메뉴 숨김 */
+.stApp, .stApp p, .stApp button, .stApp div, .stApp h2, .stApp h3 {
+  font-family: "Pretendard", "Noto Sans KR", sans-serif;
+}
+[data-testid="stIconMaterial"] { font-family: "Material Symbols Rounded" !important; }
+/* 2초마다 다시 그릴 때 화면이 흐려지지 않게 */
+[data-stale="true"] { opacity: 1 !important; transition: none !important; }
+.stApp { background: #FFFFFF; color: var(--ink); }
+header[data-testid="stHeader"], footer, #MainMenu, [data-testid="stToolbar"], [data-testid="stDecoration"] { display: none !important; }
+.block-container { max-width: 420px !important; padding: 20px 20px 120px !important; }
+[data-testid="stVerticalBlock"] { gap: 0.5rem; }
+b, .stats b, .visit-time, .visit-right, .tl-hour, .tl-chip, .tl-now span { font-variant-numeric: tabular-nums; }
+
+/* 버튼 줄: 핸드폰에서도 한 줄로 유지 */
+[class*="st-key-row"] [data-testid="stHorizontalBlock"] { flex-wrap: nowrap !important; gap: 4px !important; }
+[class*="st-key-row"] [data-testid="stColumn"] { min-width: 0 !important; width: auto !important; flex: 1 1 0 !important; }
+
+/* 맨 위 */
+.brand { display: flex; align-items: center; gap: 8px; font-size: 22px; font-weight: 700; }
+.title-date { font-size: 22px; font-weight: 700; }
+.subdate { color: var(--sub); font-size: 15px; margin-top: 4px; }
+.st-key-mode_btn { align-self: flex-end; margin-left: auto; }
+.st-key-mode_btn button {
+  border-radius: 999px; border: 1px solid #D0D4D9; background: #FFFFFF; color: var(--ink);
+  min-height: 40px; padding: 0 16px; position: relative;
+}
+.st-key-mode_btn button[kind="primary"] { background: #1F2329; border-color: #1F2329; color: #FFFFFF; }
+.st-key-modewrap_alert .st-key-mode_btn button::after {
+  content: ""; position: absolute; top: 0; right: 6px; width: 9px; height: 9px; border-radius: 50%; background: var(--orange);
+}
+.banner { background: var(--past-bg); color: var(--sub); font-size: 13px; padding: 8px 12px; border-radius: 8px; }
+
+/* 상태 카드 (솔직 모드 홈) */
+.card { border-radius: 16px; padding: 22px 24px 26px; margin-top: 8px; }
+.card .dot { display: block; width: 12px; height: 12px; border-radius: 50%; margin-bottom: 28px; }
+.card h2 { font-size: 28px; font-weight: 700; margin: 0 0 6px; padding: 0; line-height: 1.25; }
+.card p { font-size: 16px; margin: 0; }
+.card.green { background: var(--green-bg); color: var(--green-ink); }
+.card.green .dot { background: var(--green); }
+.card.orange { background: var(--orange-bg); color: var(--orange-ink); }
+.card.orange .dot { background: var(--orange); }
+
+/* 횟수 두 칸 */
+.stats { display: flex; border-bottom: 1px solid var(--line); padding: 16px 0; }
+.stats > div { flex: 1; padding-left: 4px; }
+.stats > div + div { border-left: 1px solid var(--line); padding-left: 20px; }
+.stats span { display: block; color: var(--sub); font-size: 13px; margin-bottom: 6px; }
+.stats b { font-size: 28px; font-weight: 700; }
+
+.section-title { font-size: 18px; font-weight: 700; }
+.section-gap { height: 20px; }
+.muted { color: var(--sub); font-size: 13px; }
+.right { text-align: right; }
+.empty { color: var(--sub); font-size: 15px; padding: 20px 0; }
+.caption { color: var(--sub); font-size: 13px; text-align: center; margin-top: 8px; }
+.big-count { font-size: 28px; font-weight: 700; margin: 12px 0 4px; }
+
+/* 글자만 있는 버튼 (전체 보기, 오늘로, 달 이동) */
+.st-key-see_all, .st-key-go_today_h { align-self: flex-end; margin-left: auto; }
+.st-key-see_all button, .st-key-go_today_h button, [class*="st-key-mnav"] button {
+  border: none; background: transparent; color: var(--sub); box-shadow: none; min-height: 32px; padding: 0 4px;
+}
+[class*="st-key-mnav"] button p { font-size: 22px; }
+.month-title { text-align: center; font-size: 18px; font-weight: 700; }
+
+/* 방문 목록 */
+.visit { display: flex; align-items: flex-start; gap: 12px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.visit .dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 7px; background: var(--past-edge); flex: none; }
+.visit.now .dot { background: var(--orange); }
+.visit-main { flex: 1; }
+.visit-title { font-size: 16px; font-weight: 600; }
+.visit.now .visit-title { color: var(--orange-ink); }
+.visit-time { font-size: 13px; color: var(--sub); margin-top: 3px; }
+.visit-right { font-size: 14px; font-weight: 600; }
+.visit.now .visit-right { color: var(--orange); }
+
+/* 날짜 버튼 (주간 줄, 한 달 달력) */
+.weekhead { display: flex; margin-top: 8px; }
+.weekhead span { flex: 1; text-align: center; color: var(--sub); font-size: 13px; }
+[class*="st-key-d_"] { align-self: center; }
+[class*="st-key-d_"] button {
+  width: 40px; height: 40px; min-height: 40px; padding: 0; border-radius: 50%;
+  border: none; background: transparent; color: var(--ink); box-shadow: none;
+}
+[class*="st-key-d_"] button p { font-size: 15px; }
+[class*="st-key-d_"] button[kind="primary"] { background: var(--blue); color: #FFFFFF; }
+[class*="st-key-d_"] button:disabled { color: #C4C7CC; background: transparent; }
+[class*="st-key-d_"][class*="_out"] button { color: #A9AEB4; }
+.chip { font-size: 11px; text-align: center; color: var(--sub); background: var(--past-bg); border-radius: 6px; padding: 1px 0; margin: -4px 2px 0; }
+.chip.today { background: var(--orange-bg); color: var(--orange-ink); }
+.chip.empty { background: transparent; height: 17px; }
+
+/* 위장 모드 일정표 */
+.timeline { margin-top: 8px; border-top: 1px solid var(--line); }
+.tl-row { display: flex; gap: 10px; border-bottom: 1px solid var(--line); min-height: 64px; }
+.tl-hour { width: 44px; flex: none; color: var(--sub); font-size: 12px; padding-top: 6px; }
+.tl-body { flex: 1; padding: 6px 0; display: flex; flex-direction: column; gap: 6px; }
+.tl-chip { background: var(--past-bg); border-left: 3px solid var(--past-edge); border-radius: 6px; font-size: 13px; color: #3C4043; padding: 4px 10px; }
+.tl-now { position: relative; height: 2px; background: var(--blue); margin: 10px 0 6px; }
+.tl-now span { position: absolute; left: -54px; top: -8px; font-size: 12px; color: var(--blue); font-weight: 600; background: #FFFFFF; }
+.tl-block { border-radius: 8px; padding: 16px 18px; min-height: 220px; }
+.tl-block h3 { font-size: 24px; font-weight: 700; margin: 0 0 8px; padding: 0; }
+.tl-block p { font-size: 15px; margin: 0; }
+.tl-block.green { background: var(--green-bg); border-left: 4px solid var(--green); color: var(--green-ink); }
+.tl-block.orange { background: var(--orange-bg); border-left: 4px solid var(--orange); color: var(--orange-ink); }
+
+/* 아래 탭 바 */
+.st-key-row_tabbar {
+  position: fixed; bottom: 0; left: 50%; transform: translateX(-50%); z-index: 999;
+  width: min(420px, 100vw); background: #FFFFFF; border-top: 1px solid var(--line); padding: 6px 20px 12px;
+}
+.st-key-tab_home, .st-key-tab_log { width: 100% !important; }
+.st-key-row_tabbar button { border: none; background: transparent; color: #80868B; box-shadow: none; width: 100%; }
+.st-key-row_tabbar button[kind="primary"] { color: var(--blue); background: transparent; }
+.st-key-row_tabbar button p { font-size: 13px; }
+
+/* 테스트 버튼 */
+.test-title { color: var(--sub); font-size: 13px; margin-bottom: 8px; }
+
+/* 여백 다듬기 */
+.banner { margin: 4px 0 6px; }
+.subdate { margin-bottom: 4px; }
+.weekhead { margin-top: 14px; }
+.st-key-row_recent, .st-key-row_logtitle { margin-top: 12px; }
+.tl-gap { color: var(--sub); font-size: 12px; text-align: center; padding: 4px 0; border-bottom: 1px solid var(--line); }
+.st-key-fake_come button, .st-key-fake_leave button { background: #FFFFFF; color: var(--ink); border: 1px solid #D0D4D9; width: 100%; }
+.st-key-fake_come, .st-key-fake_leave { width: 100% !important; }
+
+/* 달력 펼치기 / 접기 손잡이 */
+[class*="st-key-handle_"] { align-self: center; }
+[class*="st-key-handle_"] button {
+  border: none; background: transparent; color: var(--sub); box-shadow: none; min-height: 32px; padding: 2px 12px;
+}
+[class*="st-key-handle_"] button p { font-size: 13px; }
+.st-key-handle_open_hl, .st-key-handle_open_dh, .st-key-handle_open_dl { margin-top: -4px; }
