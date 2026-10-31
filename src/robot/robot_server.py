@@ -18,6 +18,7 @@ BASE_ANGLE = 30   # 평소 각도: 정면(수평)
 BOW_ANGLE = 0     # 숙인 각도: 인사 (0 보다 작게는 못 감)
 PAN_CENTER = 78   # 좌우 정면 (10/31 다시 맞춤)
 BOW_HOLD_SEC = 1  # 숙인 채로 멈추는 시간
+FACE_FRONT_RETRY_SEC = 10  # 서버 시작 후 정면을 한 번 더 맞추기까지 기다리는 시간
 
 # 라즈봇 V2 확장보드 (I2C) — 제조사 Raspbot_Lib 의 Ctrl_Servo 와 같은 방식
 I2C_BUS = 1
@@ -93,6 +94,8 @@ if __name__ == "__main__":
     parser.add_argument("--mock", action="store_true", help="로봇 없이 콘솔 출력만 하는 테스트 모드")
     mock_mode = parser.parse_args().mock
     face_front()
+    # 전원을 켤 때 보드가 늦게 서보를 기본 위치로 돌려놓으므로, 잠시 뒤 한 번 더 정면으로 맞춤
+    threading.Timer(FACE_FRONT_RETRY_SEC, face_front).start()
     app.run(host="0.0.0.0", port=ROBOT_PORT)
 
 # 실행 (라즈봇에서, 레포 맨 위 폴더 기준):   python3 src/robot/robot_server.py
