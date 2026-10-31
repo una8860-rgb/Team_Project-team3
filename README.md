@@ -2,7 +2,7 @@
 
 > PC 사용 중 누군가 다가오면 AI가 감지해 화면을 업무 화면으로 바꾸고, 로봇이 대신 인사하는 시스템
 
-[요구사항](docs/requirements.md) · [설계·통신 규격](docs/design.md) · [마일스톤](docs/milestones/) · [작업 일지](docs/progress.md) · [회의록](docs/meetings/)
+[요구사항](docs/requirements.md) · [설계·통신 규격](docs/design.md) · [마일스톤](docs/milestones/) · [작업 일지](docs/progress.md) · [회의록](docs/meetings/) · [노션 (계획·역할 정리)](https://app.notion.com/p/AI-3-4091a342007780a991eccf3ca05322e4)
 
 ## 역할 분담
 
