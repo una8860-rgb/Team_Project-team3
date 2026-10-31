@@ -64,6 +64,11 @@ function durationText(sec) {
   return `${Math.floor(s / 3600)}시간 ${Math.floor((s % 3600) / 60)}분`;
 }
 
+// 글자 안의 숫자는 크게, 단위(회, 분, 초 등)는 작게 보이도록 나눕니다. "1분 5초" → 1<small>분</small> 5<small>초</small>
+function unitHtml(text) {
+  return String(text).replace(/([^\d\s:.,%-]+)/g, '<small class="unit">$1</small>');
+}
+
 // ---- 데이터 받기 ----
 
 // 서버에서 JSON 을 받아 옵니다.
@@ -147,36 +152,50 @@ function hourlyCounts(events) {
 
 // ---- 그리기 ----
 
-// 숫자 카드(주요 4개 + 추가 4개)를 채웁니다.
+// KPI 위젯 4개와 타임라인 요약 4개를 채웁니다. 숫자는 크게, 단위는 작게.
 function renderKpis(day, visits, hourly) {
   const set = (id, text) => { document.getElementById(id).textContent = text; };
-  set("kpi-count", `${day.count}회`);
-  set("kpi-count-sub", dateInput.value);
+  const setHtml = (id, html) => { document.getElementById(id).innerHTML = html; };
+  const isToday = dateInput.value === todayKst();
+  const done = visits.filter((v) => v.stay != null);
+  const total = done.reduce((a, v) => a + v.stay, 0);
+  const peak = Math.max(...hourly);
+  const peakHour = hourly.indexOf(peak);
 
+  // 감지 횟수
+  setHtml("kpi-count", unitHtml(`${day.count}회`));
+  set("kpi-count-sub", isToday ? "오늘 감지된 횟수" : `${dateInput.value} 감지 횟수`);
+  set("kpi-count-badge", peak ? `${peakHour}시에 가장 많음` : "");
+
+  // 현재 상태 (사람 있음이면 몇 분째인지)
   const stateEl = document.getElementById("kpi-state");
   const present = day.status && day.status.state === STATE_PRESENT;
   stateEl.innerHTML = `<span class="pulse"></span>${present ? "사람 있음" : "사람 없음"}`;
   stateEl.className = `kpi-value state ${present ? "present" : "absent"}`;
   document.getElementById("kpi-state-card").classList.toggle("is-present", !!present);
-  set("kpi-state-sub", day.status && day.status.since ? `${timeOf(day.status.since)}부터` : "");
+  let stateSub = "";
+  if (day.status && day.status.since) {
+    stateSub = `${timeOf(day.status.since)}부터`;
+    const since = new Date(day.status.since);
+    if (since.toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" }) === todayKst()) stateSub += ` · ${durationText((Date.now() - since) / 1000)}째`;
+  }
+  set("kpi-state-sub", stateSub);
 
+  // 마지막 감지
   const last = visits[visits.length - 1];
-  set("kpi-last", last ? timeOf(last.startTs).slice(0, 5) : "-");
-  set("kpi-last-sub", last && last.confidence != null ? `신뢰도 ${Math.round(last.confidence * 100)}%` : "");
+  setHtml("kpi-last", last ? `${timeOf(last.startTs).slice(0, 5)}<small class="unit">:${timeOf(last.startTs).slice(6, 8)}</small>` : "-");
+  set("kpi-last-sub", last ? (isToday ? "오늘" : dateInput.value) : "아직 감지 기록이 없습니다");
+  set("kpi-last-badge", last && last.confidence != null ? `신뢰도 ${Math.round(last.confidence * 100)}%` : "");
 
-  const done = visits.filter((v) => v.stay != null);
-  const total = done.reduce((a, v) => a + v.stay, 0);
-  set("kpi-stay", done.length ? durationText(total / done.length) : "-");
+  // 평균 머문 시간
+  setHtml("kpi-stay", done.length ? unitHtml(durationText(total / done.length)) : "-");
+  set("kpi-stay-badge", done.length ? `총 ${durationText(total)}` : "");
 
-  const peak = Math.max(...hourly);
-  const peakHour = hourly.indexOf(peak);
-  set("kpi-peak", peak ? `${peakHour}시대 (${peak}회)` : "-");
-
+  // 타임라인 요약
+  set("kpi-peak", peak ? `${peakHour}시 · ${peak}회` : "-");
   const longest = done.reduce((m, v) => (!m || v.stay > m.stay ? v : m), null);
-  set("kpi-longest", longest ? `${durationText(longest.stay)} (${timeOf(longest.startTs).slice(0, 5)})` : "-");
-
+  set("kpi-longest", longest ? durationText(longest.stay) : "-");
   set("kpi-total", done.length ? durationText(total) : "-");
-
   const confs = visits.map((v) => v.confidence).filter((c) => c != null);
   set("kpi-conf", confs.length ? `${Math.round((confs.reduce((a, b) => a + b, 0) / confs.length) * 100)}%` : "-");
 }
@@ -190,7 +209,9 @@ function renderTimeline(visits, date) {
     const end = v.endTs ? secOfDay(v.endTs) : (isToday ? now : start);
     return { start, end: Math.max(start, end), live: !v.endTs && isToday };
   });
-  drawTimeline(document.getElementById("timeline"), spans, now, { height: document.body.classList.contains("big") ? 110 : 78 });
+  const nowLabel = isToday ? `지금 ${new Date().toLocaleTimeString("sv-SE", { timeZone: "Asia/Seoul" }).slice(0, 5)}` : null;
+  drawTimeline(document.getElementById("timeline"), spans, now, { height: document.body.classList.contains("big") ? 180 : 136, nowLabel });
+  document.getElementById("timeline-empty").classList.toggle("hidden", visits.length > 0);
 }
 
 // 기록 표를 최신순으로 그립니다. 필터를 따르고, 한 페이지에 10줄씩, 새로 생긴 기록은 잠깐 강조합니다.
@@ -210,12 +231,16 @@ function renderTable(events, visits, newIds) {
       <td class="id">${e.id}</td>
       <td><span class="tag ${detected ? "present" : "absent"}">${icon}${detected ? "사람 감지" : "사람 사라짐"}</span></td>
       <td class="time">${timeOf(e.timestamp)}</td>
-      <td class="num">${confidenceCell(e.confidence)}</td>
-      <td class="num">${stay}</td>
+      <td>${confidenceCell(e.confidence)}</td>
+      <td class="stay">${stay}</td>
     </tr>`;
   }).join("");
   document.getElementById("empty").classList.toggle("hidden", shown.length > 0);
-  document.getElementById("table-count").textContent = filter === "all" ? `${events.length}건` : `${shown.length}건 / 전체 ${events.length}건`;
+  const detectedCount = events.filter((e) => e.type === EVENT_DETECTED).length;
+  document.getElementById("table-count").textContent =
+    `전체 ${events.length}건 · 감지 ${detectedCount}건 · 사라짐 ${events.length - detectedCount}건`;
+  const from = shown.length ? (page - 1) * PAGE_SIZE + 1 : 0;
+  document.getElementById("page-info").textContent = shown.length ? `${shown.length}건 중 ${from}–${from + pageRows.length - 1}` : "";
 }
 
 // 기록 표 뱃지 아이콘 (사람 감지: 사람, 사람 사라짐: 나가는 화살표)
@@ -229,12 +254,24 @@ function confidenceCell(c) {
   return `<span class="conf"><span class="conf-bar"><i style="width:${pct}%"></i></span>${pct}%</span>`;
 }
 
-// 표 아래 페이지 번호(이전 1 2 3 다음)를 그립니다. 한 페이지뿐이면 숨깁니다.
+// 보여줄 페이지 번호 목록을 만듭니다. 많으면 가운데를 "…" 로 줄입니다. 예: 1 … 4 5 6 … 12
+function pageList(pages) {
+  if (pages <= 7) return Array.from({ length: pages }, (_, i) => i + 1);
+  const keep = new Set([1, pages, page - 1, page, page + 1].filter((p) => p >= 1 && p <= pages));
+  const list = [...keep].sort((a, b) => a - b);
+  const out = [];
+  list.forEach((p, i) => { if (i && p - list[i - 1] > 1) out.push("…"); out.push(p); });
+  return out;
+}
+
+// 표 아래 페이지 번호(이전 1 2 3 … 다음)를 그립니다. 한 페이지뿐이면 숨깁니다.
 function renderPager(pages) {
   const nav = document.getElementById("pager");
   if (pages <= 1) { nav.innerHTML = ""; return; }
   let html = `<button data-page="${page - 1}" ${page === 1 ? "disabled" : ""} aria-label="이전 페이지">&lsaquo;</button>`;
-  for (let p = 1; p <= pages; p++) html += `<button data-page="${p}" class="${p === page ? "on" : ""}">${p}</button>`;
+  pageList(pages).forEach((p) => {
+    html += p === "…" ? '<span class="gap">…</span>' : `<button data-page="${p}" class="${p === page ? "on" : ""}" ${p === page ? 'aria-current="page"' : ""}>${p}</button>`;
+  });
   html += `<button data-page="${page + 1}" ${page === pages ? "disabled" : ""} aria-label="다음 페이지">&rsaquo;</button>`;
   nav.innerHTML = html;
 }
@@ -242,12 +279,20 @@ function renderPager(pages) {
 // 그래프 두 개와 타임라인을 다시 그립니다. (창 크기·크게 보기가 바뀔 때도 부름)
 function redrawCharts() {
   if (!view) return;
-  const big = document.body.classList.contains("big");
   const hourLabels = Array.from({ length: 24 }, (_, h) => `${h}시`);
-  drawColumns(document.getElementById("chart"), hourLabels, view.hourly, { height: big ? 320 : 240, labelEvery: 3, values: "all", barMax: 16 });
+  const hourTotal = view.hourly.reduce((a, b) => a + b, 0);
+  const peakHour = hourTotal ? view.hourly.indexOf(Math.max(...view.hourly)) : null;
+  drawColumns(document.getElementById("chart"), hourLabels, view.hourly,
+    { labelEvery: 3, highlight: peakHour, yTitle: "감지 횟수 (회)", barMax: 18 });
+  document.getElementById("chart-total").textContent = `하루 합계 ${hourTotal}회`;
+  document.getElementById("chart-empty").classList.toggle("hidden", hourTotal > 0);
   if (view.trend) {
     const labels = view.trend.dates.map((d) => `${+d.slice(5, 7)}/${+d.slice(8, 10)}`);
-    drawColumns(document.getElementById("trend"), labels, view.trend.counts, { height: big ? 320 : 240, highlight: TREND_DAYS - 1, values: "all", trend: true, barMax: 26 });
+    const trendTotal = view.trend.counts.reduce((a, b) => a + b, 0);
+    drawColumns(document.getElementById("trend"), labels, view.trend.counts,
+      { highlight: TREND_DAYS - 1, muteOthers: true, trend: true, barMax: 30 });
+    document.getElementById("trend-total").textContent = `7일 합계 ${trendTotal}회`;
+    document.getElementById("trend-empty").classList.toggle("hidden", trendTotal > 0);
   }
   renderTimeline(view.visits, view.date);
 }
@@ -277,6 +322,9 @@ async function refresh() {
     const [day, trend] = await Promise.all([fetchDay(date), fetchTrend(date)]);
     const visits = buildVisits(day.events);
     const hourly = hourlyCounts(day.events);
+    // 집계 기준 확인: 서버의 감지 횟수(/api/stats)와 기록 중 '사람 감지' 수가 같아야 합니다.
+    const detectedInEvents = day.events.filter((e) => e.type === EVENT_DETECTED).length;
+    if (detectedInEvents !== day.count) console.warn(`[web] 감지 횟수(${day.count})와 기록의 감지 수(${detectedInEvents})가 다릅니다.`);
     const newIds = new Set(lastSeenId === null ? [] : day.events.filter((e) => e.id > lastSeenId).map((e) => e.id));
     day.events.filter((e) => newIds.has(e.id) && e.type === EVENT_DETECTED).forEach(showToast);
     lastSeenId = day.events.reduce((m, e) => Math.max(m, e.id), lastSeenId ?? 0);
@@ -285,12 +333,12 @@ async function refresh() {
     renderKpis(day, visits, hourly);
     renderTable(day.events, visits, newIds);
     redrawCharts();
-    conn.textContent = TEST_MODE ? "테스트 모드 (샘플 데이터)" : "";
-    conn.classList.remove("bad");
+    conn.textContent = TEST_MODE ? "테스트 모드 (샘플 데이터)" : "실시간 연결";
+    conn.className = `status-pill ${TEST_MODE ? "info" : "ok"}`;
     document.getElementById("updated").textContent = `마지막 갱신 ${new Date().toLocaleTimeString("sv-SE", { timeZone: "Asia/Seoul" })}`;
   } catch (e) {
     conn.textContent = "서버 연결 끊김";
-    conn.classList.add("bad");
+    conn.className = "status-pill bad";
   }
 }
 
@@ -341,7 +389,7 @@ function setupFilter() {
   buttons.forEach((b) => b.addEventListener("click", () => {
     filter = b.dataset.filter;
     page = 1;
-    buttons.forEach((x) => x.classList.toggle("on", x === b));
+    buttons.forEach((x) => { x.classList.toggle("on", x === b); x.setAttribute("aria-pressed", String(x === b)); });
     if (view) renderTable(view.events, view.visits, new Set());
   }));
 }
@@ -381,26 +429,57 @@ function setupCsv() {
   });
 }
 
-// 그래프 툴팁을 연결합니다.
+// 그래프 툴팁 내용을 정합니다. (제목 + 이름/값 줄)
 function setupTooltips() {
-  attachTooltip(document.getElementById("chart"), document.getElementById("chart-tip"),
-    (i) => (view ? `${i}시 ~ ${i + 1}시: ${view.hourly[i]}회` : null));
+  attachTooltip(document.getElementById("chart"), document.getElementById("chart-tip"), (i) => {
+    if (!view) return null;
+    const total = view.hourly.reduce((a, b) => a + b, 0);
+    const n = view.hourly[i];
+    return { title: `${i}시 ~ ${i + 1}시`, rows: [["감지", `${n}회`], ["하루 중 비율", total ? `${Math.round((n / total) * 100)}%` : "-"]] };
+  });
   attachTooltip(document.getElementById("trend"), document.getElementById("trend-tip"), (i) => {
     if (!view || !view.trend) return null;
     const d = view.trend.dates[i];
     const wd = WEEKDAYS[new Date(`${d}T12:00:00+09:00`).getDay()];
-    return `${+d.slice(5, 7)}월 ${+d.slice(8, 10)}일 (${wd}): ${view.trend.counts[i]}회`;
+    const n = view.trend.counts[i];
+    const rows = [["감지", `${n}회`]];
+    if (i > 0) {
+      const diff = n - view.trend.counts[i - 1];
+      rows.push(["전날보다", diff === 0 ? "같음" : `${diff > 0 ? "+" : ""}${diff}회`]);
+    }
+    return { title: `${+d.slice(5, 7)}월 ${+d.slice(8, 10)}일 (${wd})`, rows };
   });
   attachTooltip(document.getElementById("timeline"), document.getElementById("timeline-tip"), (i) => {
     const v = view && view.visits[i];
     if (!v) return null;
-    if (!v.endTs) return `${timeOf(v.startTs)} ~ 지금 (머무는 중)`;
-    return `${timeOf(v.startTs)} ~ ${timeOf(v.endTs)} (${durationText(v.stay)})`;
+    return {
+      title: "사람이 있던 구간",
+      rows: [
+        ["감지", timeOf(v.startTs)],
+        ["사라짐", v.endTs ? timeOf(v.endTs) : "머무는 중"],
+        ["머문 시간", v.stay != null ? durationText(v.stay) : "-"],
+        ["신뢰도", v.confidence != null ? `${Math.round(v.confidence * 100)}%` : "-"],
+      ],
+    };
   });
+}
+
+// 헤더의 지금 시각(한국 시간)을 1초마다 바꿉니다.
+function startClock() {
+  const tick = () => {
+    const now = new Date();
+    document.getElementById("clock-time").textContent = now.toLocaleTimeString("sv-SE", { timeZone: "Asia/Seoul" });
+    const d = now.toLocaleDateString("sv-SE", { timeZone: "Asia/Seoul" });
+    const wd = WEEKDAYS[new Date(`${d}T12:00:00+09:00`).getDay()];
+    document.getElementById("clock-date").textContent = `${+d.slice(5, 7)}월 ${+d.slice(8, 10)}일 (${wd})`;
+  };
+  tick();
+  setInterval(tick, 1000);
 }
 
 // 처음 열 때: 날짜를 정하고, 2초마다 새로 받습니다. 테스트 모드면 샘플이 있는 날짜로 시작합니다.
 async function initDashboard() {
+  startClock();
   setupThemeToggle();
   setupBigMode();
   setupFilter();
