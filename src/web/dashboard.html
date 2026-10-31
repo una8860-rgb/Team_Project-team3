@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>감지 기록 대시보드</title>
+  <link rel="stylesheet" href="dashboard.css" />
+</head>
+<body>
+  <main class="dash">
+    <header class="dash-head">
+      <div>
+        <h1>감지 기록</h1>
+        <p class="muted">딴짓 보호 로봇 · 사람이 감지된 시각과 횟수</p>
+      </div>
+      <div class="controls">
+        <label>날짜 <input type="date" id="date" /></label>
+        <span id="conn" class="conn"></span>
+      </div>
+    </header>
+
+    <!-- 숫자 카드 -->
+    <section class="kpis">
+      <div class="kpi">
+        <div class="kpi-label">감지 횟수</div>
+        <div class="kpi-value" id="kpi-count">-</div>
+        <div class="kpi-sub muted" id="kpi-count-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">현재 상태</div>
+        <div class="kpi-value state" id="kpi-state">-</div>
+        <div class="kpi-sub muted" id="kpi-state-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">마지막 감지</div>
+        <div class="kpi-value" id="kpi-last">-</div>
+        <div class="kpi-sub muted" id="kpi-last-sub"></div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">평균 머문 시간</div>
+        <div class="kpi-value" id="kpi-stay">-</div>
+        <div class="kpi-sub muted">감지부터 사라질 때까지</div>
+      </div>
+    </section>
+
+    <!-- 시간대별 감지 그래프 -->
+    <section class="card">
+      <h2>시간대별 감지 횟수</h2>
+      <div class="chart-wrap">
+        <svg id="chart" role="img" aria-label="시간대별 감지 횟수 막대그래프"></svg>
+        <div id="tooltip" class="tooltip hidden"></div>
+      </div>
+    </section>
+
+    <!-- 기록 표 -->
+    <section class="card">
+      <h2>기록 <span class="muted" id="table-count"></span></h2>
+      <table class="log">
+        <thead><tr><th>번호</th><th>종류</th><th>시각</th><th class="num">신뢰도</th><th class="num">머문 시간</th></tr></thead>
+        <tbody id="rows"></tbody>
+      </table>
+      <p id="empty" class="muted empty hidden">이 날짜에는 기록이 없습니다.</p>
+    </section>
+
+    <p class="muted foot" id="updated"></p>
+  </main>
+
+  <script src="config.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
