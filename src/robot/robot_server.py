@@ -16,7 +16,7 @@ from common.protocol import ROBOT_COOLDOWN_SEC, ROBOT_PORT  # noqa: E402
 # 받침대 각도 — 2026-10-30 실물 확인 (reference/raspbot.md)
 BASE_ANGLE = 30   # 평소 각도: 정면(수평)
 BOW_ANGLE = 0     # 숙인 각도: 인사 (0 보다 작게는 못 감)
-PAN_CENTER = 80   # 좌우 정면
+PAN_CENTER = 78   # 좌우 정면 (10/31 다시 맞춤)
 BOW_HOLD_SEC = 1  # 숙인 채로 멈추는 시간
 
 # 라즈봇 V2 확장보드 (I2C) — 제조사 Raspbot_Lib 의 Ctrl_Servo 와 같은 방식
@@ -58,10 +58,10 @@ def face_front():
 
 
 def greet():
-    """인사 동작: 숙이기 → 잠깐 멈춤 → 원위치."""
+    """인사 동작: 숙이기 → 잠깐 멈춤 → 원위치 (좌우도 정면으로 다시 맞춤)."""
     move_head(BOW_ANGLE)
     time.sleep(BOW_HOLD_SEC)
-    move_head(BASE_ANGLE)
+    face_front()
 
 
 @app.post("/greet")
