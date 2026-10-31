@@ -27,13 +27,13 @@
 ## 앱 코드 규칙
 
 - 서버 주소·포트·이벤트 이름·주기는 코드에 직접 쓰지 않습니다.
-  - Python이면 `src/common/protocol.py` 의 `server_url()`, `EVENT_PERSON_DETECTED`, `APP_POLL_SEC` 를 씁니다.
-  - Python이 아닌 도구라면 설정 파일 한 곳에 모아 두고, 값은 `protocol.py` 와 똑같이 맞춥니다.
+  - `src/common/protocol.py` 의 `server_url()`, `EVENT_PERSON_DETECTED`, `APP_POLL_SEC` 를 씁니다.
+- 앱은 Streamlit (Python) 으로 만듭니다. 코드는 `src/app/app.py`, 실행은 `streamlit run src/app/app.py`.
 - **테스트 모드**: 서버에 연결이 안 되면 `data/sample_events.json` 을 읽어서 화면을 보여줍니다.
 - 서버가 꺼져 있거나 응답이 늦어도 앱이 멈추거나 꺼지지 않게 합니다. (오류는 화면에 짧게 표시)
 - 웹캠 영상·사진은 다루지 않습니다. 앱은 이벤트 종류·시각·신뢰도만 받습니다.
 
 ## 하지 말 것
 
-- `src/app/` 밖의 파일은 고치지 않습니다. 필요하면 사용자에게 제안만 합니다.
+- 담당 파일(`src/app/`, `docs/milestones/M4-app.md`) 밖은 고치지 않습니다. 필요하면 사용자에게 제안만 합니다.
 - 서버 IP·비밀번호 같은 값을 이 레포(공개)에 올리지 않습니다. 개인 메모는 `src/app/CLAUDE.local.md` 에 적습니다.
