@@ -2,9 +2,9 @@
 
 > PC 사용 중 누군가 다가오면 AI가 감지해 화면을 업무 화면으로 바꾸고, 로봇이 대신 인사하는 시스템
 
-📋 [요구사항](docs/requirements.md) · 🔌 [설계·통신 규격](docs/design.md) · 🎯 [마일스톤](docs/milestones/) · 📓 [작업 일지](docs/progress.md) · 📝 [회의록](docs/meetings/)
+[요구사항](docs/requirements.md) · [설계·통신 규격](docs/design.md) · [마일스톤](docs/milestones/) · [작업 일지](docs/progress.md) · [회의록](docs/meetings/)
 
-## 👥 역할 분담
+## 역할 분담
 
 | 이름 | 담당 | 코드 폴더 | 마일스톤 | GitHub |
 |---|---|---|---|---|
@@ -13,7 +13,7 @@
 | 채웅 | 웹 화면·대시보드 | `src/web/` | [M3](docs/milestones/M3-web.md) | @chaechaechae99 |
 | 채연 | 앱 · 발표 | `src/app/` | [M4](docs/milestones/M4-app.md) | @kangchaeyeon82 |
 
-## 📁 폴더 구조
+## 폴더 구조
 
 ```
 README.md            프로젝트 설명서 (지금 보는 파일)
@@ -39,7 +39,7 @@ docs/
   team/              팀 소개 페이지 (docs/team/index.html 을 브라우저로 열기)
 ```
 
-## ✋ 작업 규칙
+## 작업 규칙
 
 1. **내 담당 폴더만 수정합니다.** (`src/내모듈/`, 내 마일스톤 파일, 내 팀 소개 페이지)
 2. 공용 파일(`src/common/`, `docs/design.md`, `requirements.txt`)은 PR로 팀 합의 후 수정합니다.
@@ -47,7 +47,7 @@ docs/
 4. 작업 시작 전엔 항상 `main` 최신 내용을 받아옵니다.
 5. 비밀번호·API 키, 모델·영상 같은 큰 파일은 올리지 않습니다. (레포가 공개 상태)
 
-## 🔁 작업 흐름 (Git)
+## 작업 흐름 (Git)
 
 ```bash
 # 처음 한 번
@@ -67,7 +67,7 @@ git push origin member2-robot-greet
 # → GitHub 에서 Pull Request 만들기
 ```
 
-## 🤖 AI 도구를 쓸 때
+## AI 도구를 쓸 때
 
 Claude Code 등은 `CLAUDE.md` → `AGENTS.md` 를 자동으로 읽고 팀 규칙을 따릅니다.
 개인 메모는 `CLAUDE.local.md` 에 쓰면 git 에 올라가지 않습니다.
