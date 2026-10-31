@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>YouTube</title>
+  <link id="favicon" rel="icon" href="" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- 시작 화면: 한 번 눌러야 전체 화면과 영상 재생이 됩니다 -->
+  <div id="start" class="start">
+    <div class="video-pick">
+      <input id="video-url" type="text" placeholder="유튜브 영상 주소를 붙여 넣으세요 (비워 두면 지난번 영상)" />
+      <p id="video-msg" class="video-msg"></p>
+    </div>
+    <button id="btn-start">시작</button>
+    <p>시연 전에 한 번 눌러 주세요. 전체 화면으로 바뀌고 영상이 재생됩니다.</p>
+    <p>새로고침하면 다시 눌러야 합니다. 전체 화면은 Esc 로 나갑니다.</p>
+  </div>
+
+  <!-- 평소 화면: 영상 시청 -->
+  <div id="normal" class="view">
+    <header class="video-top">YouTube</header>
+    <div class="video-box">
+      <div id="player"></div>
+      <!-- 유튜브를 못 불러오면 대신 보여줄 가짜 영상 -->
+      <div id="fake-video" class="fake-video hidden">
+        <div class="video-play">&#9654;</div>
+        <p>영상 재생 중</p>
+      </div>
+    </div>
+    <h2 id="video-title" class="video-title">퇴근 후 보면 더 재밌는 영상 모음 TOP 10</h2>
+  </div>
+
+  <!-- 사람 감지 시: 가짜 엑셀 업무 화면 -->
+  <div id="excel" class="view hidden">
+    <!-- 맨 위 막대: 앱 이름, 파일 이름, 검색 -->
+    <div class="xl-top">
+      <span class="xl-waffle"></span>
+      <span class="xl-app">Excel</span>
+      <span class="xl-doc">2026_4분기_매출보고서 <small>- 저장됨</small></span>
+      <span class="xl-search">검색 (Alt + Q)</span>
+      <span class="xl-user">김</span>
+    </div>
+    <!-- 리본 메뉴 탭 -->
+    <div class="xl-tabs">
+      <span>파일</span><span class="on">홈</span><span>삽입</span><span>공유</span><span>페이지 레이아웃</span><span>수식</span>
+      <span>데이터</span><span>검토</span><span>보기</span><span>도움말</span><span>그리기</span>
+      <span class="xl-tabs-right">
+        <span class="pill"><svg viewBox="0 0 20 20"><path d="M3 4h14v9H8l-4 3v-3H3z"/></svg>메모</span>
+        <span class="pill"><svg viewBox="0 0 20 20"><path d="M2 12l4-5 3 4 3-6 3 5h3"/></svg>따라잡기</span>
+        <span class="pill"><svg viewBox="0 0 20 20"><path d="M4 16l1-4 8-8 3 3-8 8zM12 5l3 3"/></svg>편집 중 &#8964;</span>
+        <span class="pill green"><svg viewBox="0 0 20 20"><path d="M11 4h5v5M16 4l-7 7M14 12v4H4V6h4"/></svg>공유 &#8964;</span>
+      </span>
+    </div>
+    <!-- 리본 메뉴 명령 (data-cmd 가 있는 버튼은 실제로 동작, 나머지는 모양만) -->
+    <div class="xl-ribbon">
+      <div class="grp">
+        <div class="col">
+          <button data-cmd="undo" title="실행 취소 (Ctrl+Z)"><svg viewBox="0 0 20 20"><path d="M7 4L3 8l4 4M3 8h9a5 5 0 010 10H9"/></svg></button>
+          <button data-cmd="redo" title="다시 실행 (Ctrl+Y)"><svg viewBox="0 0 20 20"><path d="M13 4l4 4-4 4M17 8H8a5 5 0 000 10h3"/></svg></button>
+        </div>
+        <div class="lbl">실행 취소</div>
+      </div>
+      <div class="grp">
+        <div class="row">
+          <button class="big" data-cmd="paste" title="붙여넣기 (Ctrl+V)">
+            <svg viewBox="0 0 32 32" class="i32"><rect x="5" y="5" width="18" height="23" rx="2" fill="#d6a76b" stroke="#8a5a1c"/><rect x="10" y="3" width="8" height="5" rx="1" fill="#fff" stroke="#555"/><rect x="13" y="12" width="15" height="17" rx="1" fill="#fff" stroke="#555"/></svg>
+            <span>붙여넣기 &#8964;</span>
+          </button>
+          <div class="col">
+            <button data-cmd="cut" title="잘라내기 (Ctrl+X)"><svg viewBox="0 0 20 20"><circle cx="6" cy="15" r="2.5"/><circle cx="14" cy="15" r="2.5"/><path d="M7.5 13L14 3M12.5 13L6 3"/></svg></button>
+            <button data-cmd="copy" title="복사 (Ctrl+C)"><svg viewBox="0 0 20 20"><rect x="7" y="6" width="9" height="11" rx="1"/><path d="M5 14V4a1 1 0 011-1h7"/></svg></button>
+            <button data-cmd="painter" title="서식 복사"><svg viewBox="0 0 20 20"><rect x="4" y="3" width="11" height="6" rx="1" fill="#f2c94c" stroke="#8a6d1c"/><path d="M15 6h2v5H10v6"/></svg></button>
+          </div>
+        </div>
+        <div class="lbl">클립보드</div>
+      </div>
+      <div class="grp">
+        <div class="row">
+          <select data-ctl="font" class="w150" title="글꼴">
+            <option>맑은 고딕</option><option>굴림</option><option>돋움</option><option>바탕</option><option>궁서</option><option>Arial</option><option>Times New Roman</option>
+          </select>
+          <select data-ctl="size" class="w60" title="글꼴 크기">
+            <option>8</option><option>9</option><option>10</option><option>11</option><option>12</option><option>14</option><option>16</option><option>18</option><option>20</option><option>24</option><option>28</option><option>36</option><option>48</option><option>72</option>
+          </select>
+          <button data-cmd="sizeUp" title="글꼴 크기 크게" class="txt">가<sup>^</sup></button>
+          <button data-cmd="sizeDown" title="글꼴 크기 작게" class="txt small">가<sup>v</sup></button>
+        </div>
+        <div class="row">
+          <button data-cmd="bold" title="굵게 (Ctrl+B)" class="txt b">가</button>
+          <button data-cmd="italic" title="기울임꼴 (Ctrl+I)" class="txt i">가</button>
+          <button data-cmd="underline" title="밑줄 (Ctrl+U)" class="txt u">간</button>
+          <button data-cmd="strike" title="취소선" class="txt s">가</button>
+          <button data-cmd="border" title="테두리"><svg viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" stroke-dasharray="2 1.5"/><path d="M10 3v14M3 10h14" stroke-dasharray="2 1.5"/></svg></button>
+          <span class="split">
+            <button data-cmd="fill" title="채우기 색"><svg viewBox="0 0 20 20"><path d="M4 10l6-6 6 6-6 5z"/><rect x="2" y="16.5" width="16" height="3" id="fill-bar" fill="#ffff00" stroke="none"/></svg></button>
+            <label class="arrow" title="채우기 색 고르기">&#8964;<input type="color" data-ctl="fillColor" value="#ffff00" /></label>
+          </span>
+          <span class="split">
+            <button data-cmd="color" title="글꼴 색" class="txt fc">가<i id="color-bar" style="background:#ff0000"></i></button>
+            <label class="arrow" title="글꼴 색 고르기">&#8964;<input type="color" data-ctl="fontColor" value="#ff0000" /></label>
+          </span>
+        </div>
+        <div class="lbl">글꼴</div>
+      </div>
+      <div class="grp">
+        <div class="row">
+          <div class="col3">
+            <div class="row">
+              <button data-cmd="vtop" title="위쪽 맞춤"><svg viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M6 6h8"/></svg></button>
+              <button data-cmd="vmiddle" title="가운데 맞춤"><svg viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M6 10h8"/></svg></button>
+              <button data-cmd="vbottom" title="아래쪽 맞춤"><svg viewBox="0 0 20 20"><rect x="3" y="3" width="14" height="14" rx="2"/><path d="M6 14h8"/></svg></button>
+            </div>
+            <div class="row">
+              <button data-cmd="left" title="왼쪽 맞춤"><svg viewBox="0 0 20 20"><path d="M3 5h14M3 9h9M3 13h14M3 17h9"/></svg></button>
+              <button data-cmd="center" title="가운데 맞춤"><svg viewBox="0 0 20 20"><path d="M3 5h14M6 9h8M3 13h14M6 17h8"/></svg></button>
+              <button data-cmd="right" title="오른쪽 맞춤"><svg viewBox="0 0 20 20"><path d="M3 5h14M8 9h9M3 13h14M8 17h9"/></svg></button>
+            </div>
+            <div class="row">
+              <button data-cmd="outdent" title="내어쓰기"><svg viewBox="0 0 20 20"><path d="M9 5h8M9 10h8M9 15h8M6 7l-3 3 3 3"/></svg></button>
+              <button data-cmd="indent" title="들여쓰기"><svg viewBox="0 0 20 20"><path d="M9 5h8M9 10h8M9 15h8M3 7l3 3-3 3"/></svg></button>
+              <button title="방향"><svg viewBox="0 0 20 20"><path d="M4 16L15 5M11 5h4v4"/></svg></button>
+            </div>
+          </div>
+          <div class="col">
+            <button data-cmd="wrap" class="wide" title="텍스트 줄 바꿈"><svg viewBox="0 0 20 20"><path d="M3 5h14M3 10h11a3 3 0 010 6H9m2-2l-2 2 2 2M3 15h3"/></svg>텍스트 줄 바꿈</button>
+            <button data-cmd="merge" class="wide" title="병합하고 가운데 맞춤"><svg viewBox="0 0 20 20"><rect x="2" y="4" width="16" height="12" rx="2"/><path d="M5 10h10M7 8l-2 2 2 2M13 8l2 2-2 2"/></svg>병합하고 가운데 맞춤 &#8964;</button>
+          </div>
+        </div>
+        <div class="lbl">맞춤</div>
+      </div>
+      <div class="grp">
+        <div class="row">
+          <select data-ctl="numFmt" class="w150" title="표시 형식">
+            <option value="general">일반</option><option value="number">숫자</option><option value="currency">통화</option><option value="percent">백분율</option><option value="text">텍스트</option>
+          </select>
+        </div>
+        <div class="row">
+          <button data-cmd="currency" class="txt" title="통화 표시 형식">&#8361;&#8364; &#8964;</button>
+          <button data-cmd="percent" class="txt" title="백분율 스타일">%</button>
+          <button data-cmd="comma" class="txt b" title="쉼표 스타일">9</button>
+          <button data-cmd="decUp" class="txt tiny" title="자릿수 늘림">.0<br />.00</button>
+          <button data-cmd="decDown" class="txt tiny" title="자릿수 줄임">.00<br />.0</button>
+        </div>
+        <div class="lbl">숫자</div>
+      </div>
+      <div class="grp">
+        <div class="row">
+          <button class="tall" title="조건부 서식"><svg viewBox="0 0 32 32" class="i32"><rect x="4" y="5" width="24" height="22" rx="2" fill="#fff"/><rect x="7" y="9" width="18" height="4" fill="#e74c3c" stroke="none"/><rect x="7" y="16" width="11" height="4" fill="#3b82f6" stroke="none"/></svg><span>조건부<br />서식 &#8964;</span></button>
+          <button class="tall" title="표 서식"><svg viewBox="0 0 32 32" class="i32"><rect x="4" y="5" width="24" height="22" rx="2" fill="#fff"/><rect x="4" y="5" width="24" height="6" fill="#3b82f6" stroke="none"/><path d="M4 17h24M4 22h24M12 11v16M20 11v16"/></svg><span>테이블로 서식<br />지정 &#8964;</span></button>
+          <button class="tall" title="셀 스타일"><svg viewBox="0 0 32 32" class="i32"><path d="M6 10h20M6 18h20M11 5v22M19 5v22"/><path d="M18 22l8-8 2 2-8 8h-2z" fill="#3b82f6" stroke="none"/></svg><span>셀<br />스타일 &#8964;</span></button>
+        </div>
+        <div class="lbl">스타일</div>
+      </div>
+      <div class="grp">
+        <div class="col">
+          <button class="wide" title="삽입"><svg viewBox="0 0 20 20"><rect x="3" y="5" width="10" height="10"/><circle cx="14" cy="14" r="4" fill="#107c41" stroke="none"/><path d="M14 12v4M12 14h4" stroke="#fff"/></svg>삽입 &#8964;</button>
+          <button class="wide" title="삭제"><svg viewBox="0 0 20 20"><rect x="3" y="5" width="10" height="10"/><circle cx="14" cy="14" r="4" fill="#d13438" stroke="none"/><path d="M12.5 12.5l3 3M15.5 12.5l-3 3" stroke="#fff"/></svg>삭제 &#8964;</button>
+          <button class="wide" title="서식"><svg viewBox="0 0 20 20"><rect x="3" y="5" width="10" height="10"/><circle cx="14" cy="14" r="4" fill="#3b82f6" stroke="none"/></svg>서식 &#8964;</button>
+        </div>
+        <div class="lbl">셀</div>
+      </div>
+      <div class="grp">
+        <div class="row">
+          <div class="col">
+            <button data-cmd="autosum" class="txt" title="자동 합계"><b>&#931;</b> &#8964;</button>
+            <button data-cmd="clearFmt" title="서식 지우기"><svg viewBox="0 0 20 20"><path d="M8 16l-4-4 7-7 5 5-5 5zM4 17h12"/><path d="M11 5l5 5-3 3-5-5z" fill="#e879a6" stroke="none"/></svg></button>
+          </div>
+          <button class="tall" title="정렬 및 필터"><svg viewBox="0 0 32 32" class="i32"><path d="M8 6v18M5 21l3 3 3-3M14 8h6l-6 8h6M14 20h12l-5 5v3"/></svg><span>정렬 및<br />필터 &#8964;</span></button>
+          <button class="tall" title="찾기 및 선택"><svg viewBox="0 0 32 32" class="i32"><circle cx="14" cy="13" r="7"/><path d="M19 18l7 7"/></svg><span>찾기 및<br />선택 &#8964;</span></button>
+        </div>
+        <div class="lbl">편집</div>
+      </div>
+      <div class="grp">
+        <button class="tall" title="추가 기능"><svg viewBox="0 0 32 32" class="i32"><rect x="6" y="6" width="9" height="9" rx="2" stroke="#d13438"/><rect x="18" y="6" width="9" height="9" rx="2" stroke="#d13438"/><rect x="6" y="18" width="9" height="9" rx="2" stroke="#d13438"/><rect x="18" y="18" width="9" height="9" rx="2" stroke="#d13438"/></svg><span>추가<br />기능 &#8964;</span></button>
+        <div class="lbl">추가 기능</div>
+      </div>
+    </div>
+    <!-- 수식 입력줄 -->
+    <div class="xl-formula">
+      <span id="name-box" class="name-box">F5</span>
+      <span class="fx">&#10005; &nbsp; &#10003; &nbsp; <i>fx</i></span>
+      <span id="formula" class="formula">=SUM(C5:E5)</span>
+    </div>
+    <!-- 셀 격자 -->
+    <div class="xl-grid-wrap">
+      <table class="xl-grid"><thead id="grid-head"></thead><tbody id="grid-body"></tbody></table>
+      <input id="cell-editor" class="cell-editor" autocomplete="off" spellcheck="false" />
+    </div>
+    <!-- 시트 탭, 상태 표시줄 -->
+    <div class="xl-sheets">
+      <span class="nav">&#9664; &#9654;</span><span class="sheet on">4분기 매출</span><span class="sheet">부서별 상세</span><span class="sheet">요약</span><span class="sheet">+</span>
+    </div>
+    <div class="xl-status">
+      <span>준비</span>
+      <span class="right"><span id="status-sum"></span> &nbsp;&nbsp; 일반 보기 &nbsp; - &nbsp;&#9473;&#9473;&#9679;&#9473;&#9473;&nbsp; + &nbsp; 100%</span>
+    </div>
+  </div>
+
+  <!-- 테스트 모드에서만 보이는 버튼 -->
+  <div id="test-panel" class="test-panel hidden">
+    <button id="btn-present">사람 감지 (Alt+1)</button>
+    <button id="btn-absent">사람 사라짐 (Alt+2)</button>
+  </div>
+
+  <div id="conn" class="conn"></div>
+
+  <script src="config.js"></script>
+  <script src="sheet.js"></script>
+  <script src="ribbon.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
