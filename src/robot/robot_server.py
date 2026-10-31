@@ -1,10 +1,9 @@
-"""라즈봇 인사 서버 — POST /greet 를 받으면 고개 숙여 인사하고 인사 음성을 냅니다.
+"""라즈봇 인사 서버 — POST /greet 를 받으면 고개 숙여 인사합니다.
 
 규격: docs/design.md ② (포트 5000, 쿨다운 10초)
 """
 import argparse
 import os
-import subprocess
 import sys
 import threading
 import time
@@ -17,10 +16,9 @@ from common.protocol import ROBOT_COOLDOWN_SEC, ROBOT_PORT  # noqa: E402
 # 받침대 각도 — 2026-10-30 실물 확인 (reference/raspbot.md)
 BASE_ANGLE = 30   # 평소 각도: 정면(수평)
 BOW_ANGLE = 0     # 숙인 각도: 인사 (0 보다 작게는 못 감)
-PAN_CENTER = 80   # 좌우 정면
+PAN_CENTER = 78   # 좌우 정면 (10/31 다시 맞춤)
 BOW_HOLD_SEC = 1  # 숙인 채로 멈추는 시간
-
-VOICE_FILE = os.path.join(os.path.dirname(__file__), "sounds", "greeting.mp3")
+FACE_FRONT_RETRY_SEC = 10  # 서버 시작 후 정면을 한 번 더 맞추기까지 기다리는 시간
 
 # 라즈봇 V2 확장보드 (I2C) — 제조사 Raspbot_Lib 의 Ctrl_Servo 와 같은 방식
 I2C_BUS = 1
@@ -60,21 +58,11 @@ def face_front():
     move_head(BASE_ANGLE)
 
 
-def play_voice():
-    """인사 음성을 재생합니다. 기다리지 않고 바로 다음 동작으로 넘어갑니다."""
-    if mock_mode:
-        print("[테스트] 음성: 안녕하십니까 팀장님!")
-        return
-    # 라즈베리파이에 mpg123 이 필요합니다: sudo apt install mpg123
-    subprocess.Popen(["mpg123", "-q", VOICE_FILE])
-
-
 def greet():
-    """인사 동작: 음성 → 숙이기 → 잠깐 멈춤 → 원위치."""
-    play_voice()
+    """인사 동작: 숙이기 → 잠깐 멈춤 → 원위치 (좌우도 정면으로 다시 맞춤)."""
     move_head(BOW_ANGLE)
     time.sleep(BOW_HOLD_SEC)
-    move_head(BASE_ANGLE)
+    face_front()
 
 
 @app.post("/greet")
@@ -106,6 +94,8 @@ if __name__ == "__main__":
     parser.add_argument("--mock", action="store_true", help="로봇 없이 콘솔 출력만 하는 테스트 모드")
     mock_mode = parser.parse_args().mock
     face_front()
+    # 전원을 켤 때 보드가 늦게 서보를 기본 위치로 돌려놓으므로, 잠시 뒤 한 번 더 정면으로 맞춤
+    threading.Timer(FACE_FRONT_RETRY_SEC, face_front).start()
     app.run(host="0.0.0.0", port=ROBOT_PORT)
 
 # 실행 (라즈봇에서, 레포 맨 위 폴더 기준):   python3 src/robot/robot_server.py
