@@ -30,8 +30,8 @@ section { margin-bottom: 32px; }
 section h2 { font-size: 1.2rem; color: var(--accent); }
 
 .todo { list-style: none; padding: 0; }
-.todo li::before { content: "⬜ "; }
-.todo li.done::before { content: "✅ "; }
+.todo li::before { content: "[ ] "; }
+.todo li.done::before { content: "[x] "; }
 .todo li.done { color: var(--muted); text-decoration: line-through; }
 
 .log { padding: 12px 16px; margin-bottom: 12px; background: #fff; border-left: 4px solid var(--accent); border-radius: 8px; }
