@@ -19,7 +19,7 @@
 
 ```
  [AI · 한웅]                [웹 서버 · 한웅]                  [로봇 · 유나]
- 웹캠 사람 감지  ──POST──▶  /api/events  ──POST /greet──▶  라즈봇 인사 + 음성
+ 웹캠 사람 감지  ──POST──▶  /api/events  ──POST /greet──▶  라즈봇 인사
                             (기록 저장)
                                ▲      ▲
                        GET 0.5초마다   GET 2초마다
