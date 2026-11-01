@@ -8,6 +8,9 @@ requests==2.32.3
 # 로봇 서버 (src/robot) — 라즈봇에서 실행
 Flask==3.0.3
 
+# 앱 (src/app) — 채연 노트북에서 실행
+streamlit==1.50.0
+
 # 중앙 서버 (src/server) — 한웅이 프레임워크를 정하면 추가
 # AI 감지 (src/ai) — 한웅이 모델·라이브러리를 정하면 추가
 # 라즈봇 서보 제어 — pip 라이브러리 필요 없음 (라즈베리파이에서 sudo apt install python3-smbus)
