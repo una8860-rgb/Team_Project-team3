@@ -68,9 +68,10 @@ curl.exe -X POST http://<라즈봇IP>:5000/greet
 
 로봇 없이 테스트 모드로 실행 (서보 대신 콘솔에 출력, 아무 컴퓨터에서나 가능):
 ```
-pip install -r requirements.txt
-python src/robot/robot_server.py --mock
+py -3.13 -m pip install -r requirements.txt
+py -3.13 src/robot/robot_server.py --mock
 ```
+Python 은 3.13 을 씁니다 (라즈봇과 같은 버전). 3.15 에서는 앱용 `streamlit` 이 쓰는 `pandas` 가 설치되지 않습니다 (11/1 확인). 없으면 `py install 3.13`.
 다른 PowerShell 창에서 `curl.exe -X POST http://127.0.0.1:5000/greet` 로 확인합니다.
 
 각도 바꾸기: `robot_server.py` 맨 위 상수
