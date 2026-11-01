@@ -74,6 +74,26 @@ def fmt_duration(seconds):
     return f"{seconds // 60}분 {seconds % 60}초"
 
 
+def fmt_time(at, seconds=False):
+    """시각을 12시간제로 바꿉니다. 예: '오후 2:03', seconds=True 면 '오후 2:03:21'."""
+    ampm = "오전" if at.hour < 12 else "오후"
+    text = f"{ampm} {at.hour % 12 or 12}:{at.minute:02d}"
+    return f"{text}:{at.second:02d}" if seconds else text
+
+
+def fmt_range(start, end):
+    """시작 ~ 끝 시각. 오전/오후가 같으면 뒤쪽은 뺍니다. 예: '오후 2:10:05 ~ 2:10:31'."""
+    end_text = fmt_time(end, seconds=True)
+    if (start.hour < 12) == (end.hour < 12):
+        end_text = end_text.split(" ", 1)[1]
+    return f"{fmt_time(start, seconds=True)} ~ {end_text}"
+
+
+def fmt_hour(hour):
+    """일정표 시간 칸. 예: 14 -> '오후 2시'."""
+    return f"{'오전' if hour < 12 else '오후'} {hour % 12 or 12}시"
+
+
 def week_start(day):
     """그 날짜가 들어 있는 주의 일요일을 돌려줍니다."""
     return day - timedelta(days=(day.weekday() + 1) % 7)
@@ -222,7 +242,7 @@ def check_new_detection(today_events):
     last_seen_id = st.session_state.get("last_seen_id")
     # 처음 열었을 때는 이미 있던 기록이므로 알림 없이 기억만 합니다.
     if last_seen_id is not None and newest["id"] > last_seen_id:
-        at = parse_time(newest["timestamp"]).strftime("%H:%M")
+        at = fmt_time(parse_time(newest["timestamp"]))
         message = f"회의 시작 {at}" if st.session_state.disguise else f"누가 왔어요! {at}"
         st.toast(message)
     if last_seen_id is None or newest["id"] > last_seen_id:
@@ -333,19 +353,20 @@ def render_tabbar():
 
 
 def visit_row(visit, disguise):
-    """방문 한 건을 목록 한 줄(HTML)로 만듭니다."""
-    start = visit["start"].strftime("%H:%M:%S") if visit["start"] else "시작 기록 없음"
-    end = visit["end"].strftime("%H:%M:%S") if visit["end"] else None
-    status = visit["status"]
+    """방문 한 건을 목록 한 줄(HTML)로 만듭니다. 위장 모드면 글자만 미팅으로 바꿉니다."""
+    start, end, status = visit["start"], visit["end"], visit["status"]
     if status == "now":
-        title = "잠깐 미팅" if disguise else "지금 자리에 있음"
-        times, right, tone = f"{start} ~ 현재", "진행 중", "now"
+        title = "지금 미팅 중" if disguise else "지금 자리에 있음"
+        times, right, tone = f"{fmt_time(start, seconds=True)} ~ 현재", "진행 중", "now"
     elif status == "no_end":
         title = "잠깐 미팅" if disguise else "누가 왔어요"
-        times, right, tone = f"{start} ~ 종료 기록 없음", "-", "past"
+        times, right, tone = f"{fmt_time(start, seconds=True)} ~ 종료 기록 없음", "-", "past"
+    elif status == "no_start":
+        title = "잠깐 미팅" if disguise else "누가 갔어요"
+        times, right, tone = f"시작 기록 없음 ~ {fmt_time(end, seconds=True)}", "-", "past"
     else:
         title = "잠깐 미팅" if disguise else "누가 왔다 갔어요"
-        times, right, tone = f"{start} ~ {end}", fmt_duration(visit["seconds"]), "past"
+        times, right, tone = fmt_range(start, end), fmt_duration(visit["seconds"]), "past"
     return (
         f'<div class="visit {tone}"><span class="dot"></span>'
         f'<div class="visit-main"><div class="visit-title">{title}</div>'
@@ -371,7 +392,7 @@ def status_card(today_events, now):
     """솔직 모드 홈의 상태 카드(HTML)를 만듭니다."""
     state = current_state(today_events)
     if state == "present":
-        since = last_event_time(today_events, EVENT_PERSON_DETECTED).strftime("%H:%M")
+        since = fmt_time(last_event_time(today_events, EVENT_PERSON_DETECTED))
         return f'<div class="card orange"><span class="dot"></span><h2>누가 왔어요!</h2><p>{since}부터 자리에 있어요</p></div>'
     if state == "empty":
         return '<div class="card green"><span class="dot"></span><h2>지금 아무도 없어요</h2><p>오늘은 아직 아무도 안 왔어요</p></div>'
@@ -401,7 +422,7 @@ def render_honest_home(today_events, count, now):
     html(f'<div class="subdate">{fmt_day(now.date())}</div>')
     html(status_card(today_events, now))
     last = last_event_time(today_events, EVENT_PERSON_DETECTED)
-    html(stats_row(count, ("오늘 방문", "마지막"), last.strftime("%H:%M") if last else "-"))
+    html(stats_row(count, ("오늘 방문", "마지막"), fmt_time(last) if last else "-"))
     with st.container(key="row_recent"):
         title_col, link_col = st.columns([3, 2], vertical_alignment="center")
         title_col.markdown('<div class="section-title">최근 기록</div>', unsafe_allow_html=True)
@@ -413,32 +434,40 @@ def render_honest_home(today_events, count, now):
         html('<div class="empty">오늘은 아직 방문 기록이 없어요</div>')
 
 
-def render_honest_log(day, events, count):
-    """솔직 모드 기록: 이번 주 날짜 줄, 그날 방문 목록. 달력 펼치기를 누르면 한 달 달력만 보입니다."""
+def render_log(day, events, count, disguise):
+    """기록 탭: 이번 주 날짜 줄, 그날 방문 목록. 위장 모드면 글자만 '미팅'으로 바꿉니다.
+
+    달력 펼치기를 누르면 한 달 달력만 보입니다.
+    """
     is_today = day == today_kst()
-    alert = current_state(get_events(today_kst(), st.session_state.connected)) == "present"
-    brand = f'<div class="brand">{MASK_SVG}<span>언더커버</span></div>'
+    word = "미팅" if disguise else "방문"
+    prefix = "dl" if disguise else "hl"
+    if disguise:
+        title, alert = f'<div class="title-date">{fmt_day(day)}</div>', False
+    else:
+        title = f'<div class="brand">{MASK_SVG}<span>언더커버</span></div>'
+        alert = current_state(get_events(today_kst(), st.session_state.connected)) == "present"
     if st.session_state.month_open:
-        render_month_screen(brand, "hl", "방문", alert)
+        render_month_screen(title, prefix, word, alert)
         return
-    render_header(brand, alert_dot=alert)
+    render_header(title, alert_dot=alert)
     render_banner(st.session_state.connected)
-    render_week("hl")
+    render_week(prefix)
     last = last_event_time(events, EVENT_PERSON_DETECTED)
-    label = ("오늘 방문" if is_today else "방문", "마지막")
-    html(stats_row(count, label, last.strftime("%H:%M") if last else "-"))
+    label = (f"오늘 {word}" if is_today else word, "마지막")
+    html(stats_row(count, label, fmt_time(last) if last else "-"))
     with st.container(key="row_logtitle"):
         title_col, date_col = st.columns([3, 2], vertical_alignment="center")
-        title_col.markdown('<div class="section-title">방문 기록</div>', unsafe_allow_html=True)
+        title_col.markdown(f'<div class="section-title">{word} 기록</div>', unsafe_allow_html=True)
         if is_today:
             date_col.markdown(f'<div class="muted right">{day.month}월 {day.day}일</div>', unsafe_allow_html=True)
         else:
             date_col.button("오늘로", key="go_today_h", on_click=select_day, args=(today_kst(),))
     visits = group_visits(events, is_today)
     if visits:
-        html("".join(visit_row(v, disguise=False) for v in visits))
+        html("".join(visit_row(v, disguise) for v in visits))
     else:
-        html('<div class="empty">이날은 방문 기록이 없어요</div>')
+        html(f'<div class="empty">이날은 {word} 기록이 없어요</div>')
     render_test_buttons(st.session_state.connected)
 
 
@@ -463,12 +492,12 @@ def timeline_html(day, events, now):
             rows.append('<div class="tl-gap">···</div>')
         previous = hour
         chips = "".join(
-            f'<div class="tl-chip">{(v["start"] or v["end"]).strftime("%H:%M")} 잠깐 미팅 · {fmt_duration(v["seconds"])}</div>'
+            f'<div class="tl-chip">{fmt_time(v["start"] or v["end"])} 잠깐 미팅 · {fmt_duration(v["seconds"])}</div>'
             for v in finished if (v["start"] or v["end"]).hour == hour
         )
         if is_today and hour == now.hour:
-            chips += f'<div class="tl-now"><span>지금 {now.strftime("%H:%M")}</span></div>' + status_block(events)
-        rows.append(f'<div class="tl-row"><div class="tl-hour">{hour:02d}:00</div><div class="tl-body">{chips}</div></div>')
+            chips += f'<div class="tl-now"><span>지금<br>{fmt_time(now)}</span></div>' + status_block(events)
+        rows.append(f'<div class="tl-row"><div class="tl-hour">{fmt_hour(hour)}</div><div class="tl-body">{chips}</div></div>')
     return '<div class="timeline">' + "".join(rows) + "</div>"
 
 
@@ -476,11 +505,11 @@ def status_block(today_events):
     """위장 모드의 지금 상태 블록: 집중 시간(초록) 또는 회의 시작(주황)."""
     state = current_state(today_events)
     if state == "present":
-        since = last_event_time(today_events, EVENT_PERSON_DETECTED).strftime("%H:%M")
+        since = fmt_time(last_event_time(today_events, EVENT_PERSON_DETECTED))
         return f'<div class="tl-block orange"><h3>회의 시작</h3><p>{since}부터</p></div>'
     if state == "empty":
         return '<div class="tl-block green"><h3>집중 시간</h3><p>오늘 미팅 없음</p></div>'
-    since = last_event_time(today_events, EVENT_PERSON_LEFT).strftime("%H:%M")
+    since = fmt_time(last_event_time(today_events, EVENT_PERSON_LEFT))
     return f'<div class="tl-block green"><h3>집중 시간</h3><p>{since}부터</p></div>'
 
 
@@ -494,24 +523,6 @@ def render_disguise_home(day, events, now):
     render_banner(st.session_state.connected)
     render_week("dh")
     html(timeline_html(day, events, now))
-
-
-def render_disguise_log(day, events):
-    """위장 모드 기록: 이번 주 날짜 줄, 그날 미팅 목록. 달력 펼치기를 누르면 한 달 달력만 보입니다."""
-    is_today = day == today_kst()
-    title = f'<div class="title-date">{fmt_day(day)}</div>'
-    if st.session_state.month_open:
-        render_month_screen(title, "dl", "미팅", alert_dot=False)
-        return
-    render_header(title, alert_dot=False)
-    render_banner(st.session_state.connected)
-    render_week("dl")
-    visits = group_visits(events, is_today)
-    html(f'<div class="big-count">미팅 {len(visits)}건</div>')
-    if visits:
-        html("".join(visit_row(v, disguise=True) for v in visits))
-    else:
-        html('<div class="empty">이날은 미팅이 없어요</div>')
 
 
 # ---------- 전체 ----------
@@ -548,10 +559,8 @@ def render_app():
         render_honest_home(today_events, get_count(now.date(), today_events, connected), now)
     elif tab == "home":
         render_disguise_home(day, events, now)
-    elif not disguise:
-        render_honest_log(day, events, get_count(day, events, connected))
     else:
-        render_disguise_log(day, events)
+        render_log(day, events, get_count(day, events, connected), disguise)
     render_tabbar()
 
 
