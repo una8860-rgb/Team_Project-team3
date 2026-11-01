@@ -8,6 +8,9 @@ const SERVER_URL = params.get("server") || "";
 // 상태 확인 주기 (protocol.py 의 WEB_POLL_SEC = 0.5)
 const POLL_MS = 500;
 
+// 대시보드가 기록을 다시 받는 주기 (protocol.py 의 APP_POLL_SEC = 2)
+const DASHBOARD_POLL_MS = 2000;
+
 // 상태 값 (protocol.py 의 STATE_PRESENT, STATE_ABSENT)
 const STATE_PRESENT = "present";
 const STATE_ABSENT = "absent";
