@@ -6,12 +6,14 @@
 - 기준: 2초 이상 보이면 `person_detected`, 3초 이상 안 보이면 `person_left` (각 1번만)
 - 서버가 없을 때: 보낼 JSON을 콘솔에 출력하고 계속 돌아감
 - 마일스톤: `docs/milestones/M1-ai-server.md`
+- 설계 메모 (감지 분류 초안, 한계, 개인정보): [`NOTES.md`](NOTES.md)
 
 ## 파일
 
 ```
 src/ai/
 ├── README.md         이 문서
+├── NOTES.md          설계 메모
 └── detect_person.py  웹캠 사람 감지 (YOLO26n, 사람만 봄)
 ```
 
