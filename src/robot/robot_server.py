@@ -7,6 +7,7 @@
 """
 import argparse
 import os
+import random
 import sys
 import threading
 import time
@@ -28,7 +29,7 @@ from common.protocol import (  # noqa: E402
 BASE_ANGLE = 30   # 평소 각도: 정면(수평)
 BOW_ANGLE = 0     # 숙인 각도: 인사 (0 보다 작게는 못 감)
 PAN_CENTER = 78   # 좌우 정면 (10/31 다시 맞춤)
-BOW_HOLD_SEC = 1  # 숙인 채로 멈추는 시간
+BOW_HOLD_SEC = 0.4  # 숙인 채로 멈추는 시간 (인사 약 1.6초 + 율동 약 1.4초 = 3초, 11/2)
 GREET_WITH_DANCE = True  # True 면 인사 뒤에 율동까지 함 (11/2 팀 결정), False 면 인사만
 BOW_STEP_DEG = 2       # 인사할 때 고개를 한 번에 이만큼씩 나눠서 움직임
 BOW_STEP_SEC = 0.04    # 나눈 한 칸마다 쉬는 시간 (클수록 천천히, 30도 → 약 0.6초)
@@ -84,7 +85,7 @@ def face_front():
 
 
 def greet():
-    """인사 동작: 천천히 숙이기 → 잠깐 멈춤 → 원위치 → 율동. 그동안 사람 감지는 쉽니다."""
+    """인사 동작 (약 3초): 천천히 숙이기 → 잠깐 멈춤 → 원위치 → 무작위 율동. 그동안 사람 감지는 쉽니다."""
     _greeting.set()
     try:
         move_head_slowly(BASE_ANGLE, BOW_ANGLE)
@@ -122,47 +123,29 @@ def beep(sec=0.08):
     set_buzzer(False)
 
 
-def move_pan_slowly(start, end, step_deg=3, step_sec=0.02):
-    """고개를 좌우로 start 도에서 end 도까지 조금씩 나눠서 움직입니다."""
-    step = step_deg if end > start else -step_deg
-    for angle in range(start, end, step):
-        set_servo(PAN_SERVO_ID, angle)
-        time.sleep(step_sec)
-    set_servo(PAN_SERVO_ID, end)
+# 짧은 율동 (각 약 1.4초). 한 칸 = (좌우 각도, 상하 각도, 그 자세로 있는 초). 바퀴는 쓰지 않습니다.
+_L, _R = PAN_CENTER + DANCE_PAN_SWING, PAN_CENTER - DANCE_PAN_SWING   # 왼쪽, 오른쪽 (로봇 뒤에서 볼 때)
+DANCES = {
+    "도리도리": [(_L, BASE_ANGLE, 0.2), (_R, BASE_ANGLE, 0.25), (_L, BASE_ANGLE, 0.25),
+             (_R, BASE_ANGLE, 0.25), (PAN_CENTER, BASE_ANGLE, 0.25)],
+    "끄덕끄덕": [(PAN_CENTER, 14, 0.3), (PAN_CENTER, BASE_ANGLE, 0.3),
+             (PAN_CENTER, 14, 0.3), (PAN_CENTER, BASE_ANGLE, 0.3)],
+    "두리번": [(PAN_CENTER + 30, BASE_ANGLE, 0.45), (PAN_CENTER - 30, BASE_ANGLE, 0.55),
+            (PAN_CENTER, BASE_ANGLE, 0.3)],
+    "신나게": [(_L, 40, 0.22), (_R, 20, 0.22), (_L, 40, 0.22), (_R, 20, 0.22),
+            (PAN_CENTER, BASE_ANGLE, 0.3)],
+}
 
 
 def dance_moves():
-    """율동 동작만 (약 8초): 끄덕끄덕 → 도리도리 → 갸우뚱 → 인사. 바퀴는 쓰지 않습니다."""
-    face_front()
-    time.sleep(0.3)
-    # 1) 끄덕끄덕 4번, 숙일 때마다 삐
-    for _ in range(4):
-        beep()
-        move_head_slowly(BASE_ANGLE, 12)
-        move_head_slowly(12, BASE_ANGLE)
-    # 2) 도리도리 2번
-    left, right = PAN_CENTER + DANCE_PAN_SWING, PAN_CENTER - DANCE_PAN_SWING
-    move_pan_slowly(PAN_CENTER, left)
-    for _ in range(2):
-        beep()
-        move_pan_slowly(left, right)
-        beep()
-        move_pan_slowly(right, left)
-    move_pan_slowly(left, PAN_CENTER)
-    # 3) 갸우뚱: 옆 보면서 살짝 숙였다가 반대쪽
-    for side in (left, right):
-        move_pan_slowly(PAN_CENTER, side)
-        move_head_slowly(BASE_ANGLE, 18)
-        time.sleep(0.3)
-        move_head_slowly(18, BASE_ANGLE)
-        move_pan_slowly(side, PAN_CENTER)
-    # 4) 마무리 인사 + 삐삐
-    move_head_slowly(BASE_ANGLE, BOW_ANGLE)
+    """짧은 율동 하나를 무작위로 골라서 합니다 (약 1.4초). 시작할 때 삐 한 번."""
+    name = random.choice(list(DANCES))
+    print(f"율동: {name}")
     beep()
-    time.sleep(0.1)
-    beep()
-    time.sleep(0.6)
-    move_head_slowly(BOW_ANGLE, BASE_ANGLE)
+    for pan, tilt, hold_sec in DANCES[name]:
+        set_servo(PAN_SERVO_ID, pan)
+        move_head(tilt)
+        time.sleep(hold_sec)
 
 
 def dance():
