@@ -1,17 +1,17 @@
 # src/robot — 라즈봇: 사람 감지 + 인사 (담당: 유나)
 
-라즈봇 카메라로 사람이 있는지 보고, 사람이 오면 고개를 천천히 숙여 인사합니다. 동시에 중앙 서버에 감지 이벤트를 보내서 웹 화면 전환과 앱 기록이 이어지게 합니다. 인사 음성은 없습니다 (10/31 결정). 감지는 11/2 부터 한웅 노트북 웹캠 대신 라즈봇이 합니다.
+라즈봇 카메라로 사람이 있는지 보고, 사람이 오면 고개를 천천히 숙여 인사한 뒤 율동을 합니다 (11/2 추가). 동시에 중앙 서버에 감지 이벤트를 보내서 웹 화면 전환과 앱 기록이 이어지게 합니다. 인사 음성은 없습니다 (10/31 결정). 감지는 11/2 부터 한웅 노트북 웹캠 대신 라즈봇이 합니다.
 
 | 상황 | 라즈봇이 하는 일 |
 |---|---|
-| 사람이 1초 이상 보임 | 고개 숙여 인사 + 서버에 `person_detected` |
+| 사람이 1초 이상 보임 | 고개 숙여 인사 + 율동 (약 12초) + 서버에 `person_detected` |
 | 사람이 1초 이상 안 보임 | 서버에 `person_left` (웹 화면이 원래대로) |
-| 인사 중 | 사람 감지를 쉼 (고개를 숙이면 바닥만 보이므로) |
+| 인사·율동 중 | 사람 감지를 쉬고, 새 인사 명령도 건너뜀 (고개를 숙이면 바닥만 보이므로) |
 | 마지막 인사 후 10초 안 | 다시 인사하지 않음 (쿨다운) |
 
 - 파일: `robot_server.py` (인사 서버, 포트 5000), `person_detector.py` (사람 감지)
 - 사람이 있는지만 판단합니다. 누구인지는 알아보지 않고, 영상은 저장하거나 밖으로 보내지 않습니다.
-- 받는 것: `POST /greet`, `GET /health`. 보내는 것: `POST /api/events`. 규격은 `docs/design.md` ①②
+- 받는 것: `POST /greet`, `POST /dance` (율동만, 규격에 없는 시연용), `GET /health`. 보내는 것: `POST /api/events`. 규격은 `docs/design.md` ①②
 - 장치 정보·각도·고장 기록: `reference/raspbot.md` / 마일스톤: `docs/milestones/M2-robot-greet.md`
 
 ## 1. 켜기
@@ -50,12 +50,15 @@ ssh -t pi "sudo systemctl restart robot-greet"
 ```
 curl.exe http://<라즈봇IP>:5000/health
 curl.exe -X POST http://<라즈봇IP>:5000/greet
+curl.exe -X POST http://<라즈봇IP>:5000/dance
 ```
+`/greet` 는 인사 + 율동, `/dance` 는 율동만 합니다.
 
 | 응답 | 뜻 |
 |---|---|
 | `{"ok":true}` | 인사함 |
-| `{"ok":true,"skipped":"cooldown"}` | 마지막 인사 후 10초가 안 지나서 건너뜀. 오류 아님 |
+| `{"ok":true,"skipped":"cooldown"}` | 인사·율동 중이거나 마지막 인사 후 10초가 안 지나서 건너뜀. 오류 아님 |
+| `{"ok":true,"skipped":"busy"}` | (`/dance`) 인사·율동 중이라 건너뜀. 오류 아님 |
 | 응답 없음 (시간 초과) | 라즈봇이 꺼져 있거나 다른 와이파이에 있음 |
 
 감지 기록 보기 (유나 노트북):
@@ -102,6 +105,8 @@ Python 은 3.13 을 씁니다 (라즈봇과 같은 버전). 3.15 에서는 앱�
 | `robot_server.py` | `BASE_ANGLE` / `BOW_ANGLE` / `PAN_CENTER` | 30 / 0 / 78 | 평소 상하 / 인사 상하 / 좌우 정면 각도. 상하는 작을수록 아래, 좌우는 작을수록 오른쪽 (로봇 뒤에서 볼 때) |
 | `robot_server.py` | `BOW_STEP_DEG` / `BOW_STEP_SEC` | 2 / 0.04 | 고개를 2도씩 0.04초마다 움직임. 30도 숙이는 데 약 0.6초 |
 | `robot_server.py` | `BOW_HOLD_SEC` | 1 | 숙인 채 멈추는 시간 |
+| `robot_server.py` | `GREET_WITH_DANCE` | True | True 면 인사 뒤 율동, False 면 인사만 |
+| `robot_server.py` | `DANCE_PAN_SWING` | 25 | 율동 중 도리도리 폭 (정면에서 좌우로 몇 도) |
 | `person_detector.py` | `DETECT_HOLD_SEC` / `LEFT_HOLD_SEC` | 1 / 1 | 이만큼 보이면 감지 / 안 보이면 사라짐 (규격은 2초/3초였지만 11/2 줄임) |
 | `person_detector.py` | `MIN_CONFIDENCE` | 0.35 | 사람으로 칠 최소 확신도. 낮을수록 몸 일부만 보여도 잡히지만 잘못 잡을 수 있음 |
 
