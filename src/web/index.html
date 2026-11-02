@@ -4,6 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>YouTube</title>
+  <!-- 엑셀 전용 모드(?excel=1)면 처음부터 엑셀만 보이게 합니다. 아래 화면이 그려지기 전에 실행되어야 유튜브가 잠깐 비치지 않습니다. -->
+  <script>
+    if (new URLSearchParams(location.search).has("excel")) {
+      document.documentElement.classList.add("excel-only");
+      document.title = "2026_4분기_매출보고서.xlsx - Excel";
+    }
+  </script>
   <link id="favicon" rel="icon" href="" />
   <link rel="stylesheet" href="style.css" />
 </head>

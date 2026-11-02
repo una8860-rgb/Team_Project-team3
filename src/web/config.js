@@ -8,6 +8,9 @@ const SERVER_URL = params.get("server") || "";
 // 상태 확인 주기 (protocol.py 의 WEB_POLL_SEC = 0.5)
 const POLL_MS = 500;
 
+// 엑셀 전용 모드는 같은 노트북의 excel_popup.py 에 묻기 때문에 더 자주 물어 인사 음성을 빨리 냅니다.
+const EXCEL_ONLY_POLL_MS = 100;
+
 // 대시보드가 기록을 다시 받는 주기 (protocol.py 의 APP_POLL_SEC = 2)
 const DASHBOARD_POLL_MS = 2000;
 
@@ -24,7 +27,14 @@ const VIDEO_STORAGE_KEY = "dda-video-url";
 // 유튜브를 이 시간 안에 못 불러오면 가짜 영상 화면을 대신 보여줍니다.
 const VIDEO_LOAD_TIMEOUT_MS = 8000;
 
-// 브라우저 탭 제목
+// 인사 음성 파일. 사람이 감지되어 엑셀 화면으로 바뀔 때 셋 중 하나를 같은 확률로 재생합니다.
+const VOICE_FILES = ["sounds/greet1.mp3", "sounds/greet2.mp3", "sounds/greet3.mp3"];
+
+// 엑셀 전용 모드: 영상 없이 가짜 엑셀만 띄웁니다. excel_popup.py 가 이 모드로 창을 엽니다.
+// 창을 앞으로 꺼내고 숨기는 일은 excel_popup.py 가 하고, 이 페이지는 감지될 때 인사 음성만 냅니다.
+const EXCEL_ONLY = params.has("excel");
+
+// 브라우저 탭 제목 (excel_popup.py 가 이 엑셀 제목으로 창을 찾습니다)
 const TITLE_NORMAL = "YouTube";
 const TITLE_EXCEL = "2026_4분기_매출보고서.xlsx - Excel";
 

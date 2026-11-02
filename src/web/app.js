@@ -116,10 +116,20 @@ function setVideoPlaying(playing) {
   else player.pauseVideo();
 }
 
+// 인사 음성 중 하나를 같은 확률로 골라 재생합니다.
+function playVoice() {
+  const file = VOICE_FILES[Math.floor(Math.random() * VOICE_FILES.length)];
+  new Audio(file).play().catch((e) => console.log("[web] 음성 재생 실패:", e.message));
+}
+
 // 상태를 화면에 반영합니다. 상태가 바뀔 때만 영상·탭을 바꿉니다.
 function applyState(state) {
   if (state === currentState) return;
   const present = state === STATE_PRESENT;
+  // 시작 버튼을 누른 뒤, 없음 → 있음으로 바뀔 때만 인사합니다. (처음 열 때는 재생 안 함)
+  if (present && started && currentState !== null) playVoice();
+  // 엑셀 전용 모드는 화면을 바꾸지 않습니다. (창 전환은 excel_popup.py 가 함)
+  if (EXCEL_ONLY) { currentState = state; return; }
   excelView.classList.toggle("hidden", !present);
   normalView.classList.toggle("hidden", present);
   setTab(present);
@@ -172,9 +182,25 @@ function start() {
   setInterval(poll, POLL_MS);
 }
 
+// 엑셀 전용 모드로 시작합니다. 시작 화면과 영상 없이 엑셀만 보여주고 상태만 확인합니다.
+function startExcelOnly() {
+  started = true;
+  startScreen.classList.add("hidden");
+  normalView.classList.add("hidden");
+  excelView.classList.remove("hidden");
+  setTab(true);
+  focusSheet();
+  poll();
+  setInterval(poll, EXCEL_ONLY_POLL_MS);
+}
+
 initSheet();
 initRibbon();
-setTab(false);
-loadYouTube();
-document.getElementById("video-url").addEventListener("input", onVideoUrlInput);
-document.getElementById("btn-start").onclick = start;
+if (EXCEL_ONLY) {
+  startExcelOnly();
+} else {
+  setTab(false);
+  loadYouTube();
+  document.getElementById("video-url").addEventListener("input", onVideoUrlInput);
+  document.getElementById("btn-start").onclick = start;
+}

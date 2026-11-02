@@ -1,6 +1,9 @@
 * { box-sizing: border-box; }
 body { margin: 0; font-family: "Malgun Gothic", sans-serif; background: #fff; color: #222; }
 .hidden { display: none !important; }
+/* 엑셀 전용 모드: 시작 화면과 영상 화면은 숨기고 엑셀만 보여줌 */
+html.excel-only #start, html.excel-only #normal { display: none !important; }
+html.excel-only #excel { display: flex !important; }
 
 /* 시작 화면 */
 .start {
