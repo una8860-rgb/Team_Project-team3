@@ -1,8 +1,8 @@
 """AI 사람 감지 — 웹캠으로 사람이 있는지 보고 중앙 서버에 이벤트를 보냅니다.
 
 규격: docs/design.md ① (POST /api/events)
-- 사람이 2초 이상 계속 보이면 person_detected 를 한 번 보냄
-- 사람이 3초 이상 계속 안 보이면 person_left 를 한 번 보냄
+- 사람이 1초(DETECT_HOLD_SEC) 이상 계속 보이면 person_detected 를 한 번 보냄
+- 사람이 1초(LEFT_HOLD_SEC) 이상 계속 안 보이면 person_left 를 한 번 보냄
 - 사람(person)이 있는지만 봅니다. 얼굴 인식·영상 저장은 하지 않습니다.
 - 서버가 꺼져 있으면 보낼 JSON 을 콘솔에 출력만 하고 계속 돌아갑니다.
 """
@@ -32,10 +32,11 @@ SEND_TIMEOUT_SEC = 3
 
 
 class PersonWatcher:
-    """보임/안 보임을 계속 받아서, 2초·3초 기준을 넘는 순간에만 이벤트를 하나 돌려줍니다."""
+    """보임/안 보임을 계속 받아서, 감지·사라짐 기준을 넘는 순간에만 이벤트를 하나 돌려줍니다."""
 
-    def __init__(self, detect_hold=DETECT_HOLD_SEC):
+    def __init__(self, detect_hold=DETECT_HOLD_SEC, left_hold=LEFT_HOLD_SEC):
         self.detect_hold = detect_hold  # 이만큼 계속 보이면 person_detected (시험용으로 바꿀 수 있음)
+        self.left_hold = left_hold      # 이만큼 계속 안 보이면 person_left (시험용으로 바꿀 수 있음)
         self.present = False      # 서버에 알린 현재 상태
         self.change_since = None  # 상태와 다른 화면이 시작된 시각
         self.best_conf = 0.0      # 보이는 동안 가장 높았던 신뢰도
@@ -50,7 +51,7 @@ class PersonWatcher:
             self.best_conf = 0.0
         if seen:
             self.best_conf = max(self.best_conf, conf)
-        hold = self.detect_hold if seen else LEFT_HOLD_SEC
+        hold = self.detect_hold if seen else self.left_hold
         if now - self.change_since < hold:
             return None
         self.present = seen
@@ -106,8 +107,9 @@ def run_camera(args):
 
     model = YOLO(MODEL_NAME)
     cap = open_camera(args.camera)
-    watcher = PersonWatcher(args.detect_sec)
-    print(f"사람 감지 시작 (서버: {server_url('/api/events')}, 감지 기준 {args.detect_sec}초). 끄려면 q 또는 Ctrl+C")
+    watcher = PersonWatcher(args.detect_sec, args.left_sec)
+    print(f"사람 감지 시작 (서버: {server_url('/api/events')}, 감지 {args.detect_sec}초 / 사라짐 {args.left_sec}초). "
+          "끄려면 q 또는 Ctrl+C")
     try:
         while True:
             ok, frame = cap.read()
@@ -133,18 +135,22 @@ def run_camera(args):
 
 
 def run_self_test():
-    """웹캠 없이 2초·3초 기준이 맞는지 시간표를 흉내 내서 확인합니다."""
+    """웹캠 없이 감지·사라짐 기준이 맞는지 시간표를 흉내 내서 확인합니다."""
     watcher = PersonWatcher()
-    # (시각, 보임 여부): 1초 잠깐 보임 → 무시 / 2초 넘게 보임 → detected / 2초 안 보임 → 무시 / 3초 넘게 안 보임 → left
-    timeline = [(0, True), (1, False), (2, True), (3, True), (4.1, True), (5, False), (6, True),
-                (7, False), (9, False), (10.1, False), (11, False)]
+    d, l = DETECT_HOLD_SEC, LEFT_HOLD_SEC
+    # (시각, 보임 여부): 기준보다 짧게 보임 → 무시 / 기준 넘게 보임 → detected
+    #                   기준보다 짧게 안 보임 → 무시 / 기준 넘게 안 보임 → left
+    timeline = [(0, True), (d / 2, False),
+                (10, True), (10 + d / 2, True), (10 + d + 0.1, True),
+                (20, False), (20 + l / 2, True),
+                (30, False), (30 + l / 2, False), (30 + l + 0.1, False), (40, False)]
     sent = []
     for t, seen in timeline:
         event = watcher.update(seen, 0.9 if seen else 0.0, t)
         if event:
             sent.append((t, event))
             print(f"{t:>5}초  {event}")
-    expected = [(4.1, EVENT_PERSON_DETECTED), (10.1, EVENT_PERSON_LEFT)]
+    expected = [(10 + d + 0.1, EVENT_PERSON_DETECTED), (30 + l + 0.1, EVENT_PERSON_LEFT)]
     print("자체 시험:", "통과" if sent == expected else f"실패 (기대 {expected})")
     return sent == expected
 
@@ -154,9 +160,11 @@ if __name__ == "__main__":
     parser.add_argument("--camera", type=int, default=0, help="웹캠 번호 (기본 0, 외장 웹캠이면 1)")
     parser.add_argument("--dry-run", action="store_true", help="서버에 보내지 않고 보낼 JSON 을 출력만 함")
     parser.add_argument("--no-window", action="store_true", help="웹캠 화면 창을 띄우지 않음 (메모리 절약)")
-    parser.add_argument("--self-test", action="store_true", help="웹캠 없이 2초·3초 기준만 시험")
+    parser.add_argument("--self-test", action="store_true", help="웹캠 없이 감지·사라짐 기준만 시험")
     parser.add_argument("--detect-sec", type=float, default=DETECT_HOLD_SEC,
                         help=f"몇 초 계속 보이면 감지로 볼지 (기본 {DETECT_HOLD_SEC}초, 시험용. 팀 기준은 docs/design.md)")
+    parser.add_argument("--left-sec", type=float, default=LEFT_HOLD_SEC,
+                        help=f"몇 초 계속 안 보이면 사라짐으로 볼지 (기본 {LEFT_HOLD_SEC}초, 시험용. 팀 기준은 docs/design.md)")
     args = parser.parse_args()
     if args.self_test:
         sys.exit(0 if run_self_test() else 1)
@@ -164,6 +172,7 @@ if __name__ == "__main__":
 
 # 실행 (레포 맨 위 폴더 기준, 서버를 먼저 켠 뒤):  python src/ai/detect_person.py
 # 서버 없이 시험 (JSON 출력만):                   python src/ai/detect_person.py --dry-run
-# 웹캠 없이 2초·3초 기준 시험:                     python src/ai/detect_person.py --self-test
+# 웹캠 없이 감지·사라짐 기준 시험:                  python src/ai/detect_person.py --self-test
 # 감지 기준을 1초로 줄여 시험:                     python src/ai/detect_person.py --detect-sec 1
+# 사라짐 기준도 줄여 시험:                         python src/ai/detect_person.py --detect-sec 1 --left-sec 2
 # 서버가 다른 노트북이면 (PowerShell):             $env:SERVER_HOST="192.168.0.10"; python src/ai/detect_person.py
