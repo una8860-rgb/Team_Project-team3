@@ -3,7 +3,7 @@
 웹캠으로 사람이 있는지 판단해서 중앙 서버에 이벤트를 보냅니다.
 
 - 보내는 것: `POST /api/events` — 규격은 `docs/design.md` ①
-- 기준: 2초 이상 보이면 `person_detected`, 3초 이상 안 보이면 `person_left` (각 1번만)
+- 기준: 1초 이상 보이면 `person_detected`, 1초 이상 안 보이면 `person_left` (각 1번만, `src/common/protocol.py` 의 `DETECT_HOLD_SEC`, `LEFT_HOLD_SEC`)
 - 서버가 없을 때: 보낼 JSON을 콘솔에 출력하고 계속 돌아감
 - 마일스톤: `docs/milestones/M1-ai-server.md`
 - 설계 메모 (감지 분류 초안, 한계, 개인정보): [`NOTES.md`](NOTES.md)
@@ -28,7 +28,7 @@ src/ai/
 ```powershell
 pip install -r requirements.txt
 
-# 웹캠 없이 2초·3초 기준만 시험
+# 웹캠 없이 감지·사라짐 기준만 시험
 python src/ai/detect_person.py --self-test
 
 # 서버에 보내지 않고 JSON 만 출력
@@ -41,7 +41,7 @@ python src/ai/detect_person.py
 - 창에 웹캠 화면과 `state: PRESENT/ABSENT` 가 나옵니다. 끌 때는 창에서 `q`, 또는 PowerShell 에서 `Ctrl+C`.
 - 외장 웹캠이 안 잡히면 `--camera 1`
 - 창 없이 돌리려면 `--no-window` (메모리 절약)
-- 감지 기준을 줄여 시험하려면 `--detect-sec 1` (기본은 팀 기준 2초. 공용 값 `DETECT_HOLD_SEC` 는 그대로 둠)
+- 기준을 바꿔 시험하려면 `--detect-sec 0.5`, `--left-sec 2` (기본은 팀 기준 1초 / 1초)
 - 서버가 다른 노트북이면 `$env:SERVER_HOST="서버IP"; python src/ai/detect_person.py`
 
 ## 웹캠이 안 열릴 때
