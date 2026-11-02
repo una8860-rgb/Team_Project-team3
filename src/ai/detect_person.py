@@ -34,7 +34,8 @@ SEND_TIMEOUT_SEC = 3
 class PersonWatcher:
     """보임/안 보임을 계속 받아서, 2초·3초 기준을 넘는 순간에만 이벤트를 하나 돌려줍니다."""
 
-    def __init__(self):
+    def __init__(self, detect_hold=DETECT_HOLD_SEC):
+        self.detect_hold = detect_hold  # 이만큼 계속 보이면 person_detected (시험용으로 바꿀 수 있음)
         self.present = False      # 서버에 알린 현재 상태
         self.change_since = None  # 상태와 다른 화면이 시작된 시각
         self.best_conf = 0.0      # 보이는 동안 가장 높았던 신뢰도
@@ -49,7 +50,7 @@ class PersonWatcher:
             self.best_conf = 0.0
         if seen:
             self.best_conf = max(self.best_conf, conf)
-        hold = DETECT_HOLD_SEC if seen else LEFT_HOLD_SEC
+        hold = self.detect_hold if seen else LEFT_HOLD_SEC
         if now - self.change_since < hold:
             return None
         self.present = seen
@@ -105,8 +106,8 @@ def run_camera(args):
 
     model = YOLO(MODEL_NAME)
     cap = open_camera(args.camera)
-    watcher = PersonWatcher()
-    print(f"사람 감지 시작 (서버: {server_url('/api/events')}). 끄려면 q 또는 Ctrl+C")
+    watcher = PersonWatcher(args.detect_sec)
+    print(f"사람 감지 시작 (서버: {server_url('/api/events')}, 감지 기준 {args.detect_sec}초). 끄려면 q 또는 Ctrl+C")
     try:
         while True:
             ok, frame = cap.read()
@@ -154,6 +155,8 @@ if __name__ == "__main__":
     parser.add_argument("--dry-run", action="store_true", help="서버에 보내지 않고 보낼 JSON 을 출력만 함")
     parser.add_argument("--no-window", action="store_true", help="웹캠 화면 창을 띄우지 않음 (메모리 절약)")
     parser.add_argument("--self-test", action="store_true", help="웹캠 없이 2초·3초 기준만 시험")
+    parser.add_argument("--detect-sec", type=float, default=DETECT_HOLD_SEC,
+                        help=f"몇 초 계속 보이면 감지로 볼지 (기본 {DETECT_HOLD_SEC}초, 시험용. 팀 기준은 docs/design.md)")
     args = parser.parse_args()
     if args.self_test:
         sys.exit(0 if run_self_test() else 1)
@@ -162,4 +165,5 @@ if __name__ == "__main__":
 # 실행 (레포 맨 위 폴더 기준, 서버를 먼저 켠 뒤):  python src/ai/detect_person.py
 # 서버 없이 시험 (JSON 출력만):                   python src/ai/detect_person.py --dry-run
 # 웹캠 없이 2초·3초 기준 시험:                     python src/ai/detect_person.py --self-test
+# 감지 기준을 1초로 줄여 시험:                     python src/ai/detect_person.py --detect-sec 1
 # 서버가 다른 노트북이면 (PowerShell):             $env:SERVER_HOST="192.168.0.10"; python src/ai/detect_person.py
