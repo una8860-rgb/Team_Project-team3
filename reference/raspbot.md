@@ -9,14 +9,16 @@
 | 컴퓨터 | 라즈베리파이 5 / Debian 13 (trixie) / Python 3.13 |
 | 확장보드 | I2C 버스 1, 주소 `0x2B` (`0x3C` 는 OLED 화면) — I2C 는 `raspi-config` 로 켜야 함 |
 | 카메라 받침대 서보 | 보드 **S1 = 상하**, **S2 = 좌우** (선을 다시 꽂으면 바뀔 수 있음) |
+| 카메라 | USB 웹캠 (Microdia Integrated_Webcam_HD), `/dev/video0`, 640x480 / 1280x720. 11/2 부터 사람 감지에 씀 |
+| 사람 감지 모델 | MobileNet-SSD (Caffe, 23MB) `~/models/deploy.prototxt`, `~/models/mobilenet_iter_73000.caffemodel`. OpenCV `dnn` 으로 실행, 파이 CPU 약 130% |
 | 서보 각도 (10/31 확인) | 상하: 평소 **30도**(정면), 인사 **0도**(숙임), 숫자 작을수록 아래 / 좌우: 정면 **78도**, 숫자 작을수록 오른쪽 (로봇 뒤에서 볼 때) |
-| 자동 실행 | systemd 서비스 `robot-greet` (파이 켜면 인사 서버 자동 실행, 멈추면 3초 뒤 재시작). 로그: `journalctl -u robot-greet -f` |
+| 자동 실행 | systemd 서비스 `robot-greet` (파이 켜면 인사 서버와 사람 감지 자동 실행, 멈추면 3초 뒤 재시작). 서버 IP 는 `~/team3/robot.env`. 로그: `journalctl -u robot-greet -f` |
 | 서보 제어 방법 | 레지스터 `0x02` 에 `[서보번호, 각도]` 쓰기 (제조사 Raspbot_Lib `Ctrl_Servo` 와 같음). 키트 앱·라이브러리 설치 필요 없음 |
 | 그 밖에 확인된 것 | 부저: 레지스터 `0x06` `[1]` 켬 / `[0]` 끔. 모터: 레지스터 `0x01` `[모터번호, 방향, 속도]` (0번 = 앞왼쪽) |
 | 스피커 | 없음 (HDMI 출력만 있음) → 인사 음성은 쓰지 않기로 함 (10/31) |
 | 전원 | 본체 배터리 + 전원 스위치. 서보·모터는 배터리 전원으로 움직임 |
 | 와이파이 | 유나 휴대폰 핫스팟 `Team3` (11/2 OS 새로 설치하면서 등록). 11/2 IP `10.199.49.250` |
-| 설치한 프로그램 | `python3-flask`, `python3-smbus`, `i2c-tools` (apt) |
+| 설치한 프로그램 | `python3-flask`, `python3-smbus`, `i2c-tools`, `python3-opencv` (apt) |
 
 ## OS 를 새로 설치했을 때 다시 할 일
 
@@ -27,9 +29,14 @@
    ssh pi "mkdir -p .ssh; cat laptop_key.pub > .ssh/authorized_keys; chmod 700 .ssh; chmod 600 .ssh/authorized_keys"
    ```
 3. 코드와 서비스 파일 복사: `scp -r src/common src/robot pi:~/team3/src/`, `robot-greet.service` 를 `~/` 에
-4. 관리자 작업 (비밀번호 1번):
+4. 서버 IP 파일과 사람 감지 모델 (비밀번호 필요 없음, IP 는 한웅 노트북 것으로):
    ```
-   ssh -t pi "sudo raspi-config nonint do_i2c 0 && sudo apt update && sudo apt install -y python3-flask && sudo cp ~/robot-greet.service /etc/systemd/system/ && sudo systemctl enable robot-greet && sudo reboot"
+   ssh pi "echo SERVER_HOST=10.199.49.251 > ~/team3/robot.env"
+   ssh pi "mkdir -p ~/models && cd ~/models && curl -sLO https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/master/deploy.prototxt && curl -sLO https://raw.githubusercontent.com/chuanqi305/MobileNet-SSD/master/mobilenet_iter_73000.caffemodel"
+   ```
+5. 관리자 작업 (비밀번호 1번):
+   ```
+   ssh -t pi "sudo raspi-config nonint do_i2c 0 && sudo apt update && sudo apt install -y python3-flask python3-opencv && sudo cp ~/robot-greet.service /etc/systemd/system/ && sudo systemctl enable robot-greet && sudo reboot"
    ```
 
 `robot-greet.service` 내용:
@@ -42,6 +49,7 @@ Wants=network-online.target
 [Service]
 User=yuna
 WorkingDirectory=/home/yuna/team3
+EnvironmentFile=-/home/yuna/team3/robot.env
 ExecStart=/usr/bin/python3 -u src/robot/robot_server.py
 Restart=always
 RestartSec=3
@@ -56,3 +64,5 @@ WantedBy=multi-user.target
 - 10/31: 전원 켤 때 고개가 좌우로 한 번 튐 → 서보 특성. 서버가 켜지면서 정면으로 다시 맞춤. 인사 뒤 좌우가 틀어져서 인사 끝에 좌우도 정면으로 다시 보내게 바꿈.
 - 10/31: 전원 켜면 고개가 오른쪽을 보고 멈춤 → 보드가 서버보다 늦게 서보를 기본 위치로 보냄. 서버 시작 10초 뒤 정면을 한 번 더 맞추게 바꿔서 해결 (전원 껐다 켜서 확인).
 - 11/2: 장소 와이파이에서 라즈봇이 연결 안 됨 → 파이는 집 와이파이만 알고 있었음. 집 와이파이와 같은 이름의 핫스팟으로 시도했지만 실패, SD카드 리더로도 카드를 못 읽음. Raspberry Pi Imager 로 OS 를 새로 설치하면서 핫스팟 `Team3` 을 넣고, 위 "다시 할 일" 순서로 복구 (약 20분).
+- 11/2: 사람 감지를 한웅 노트북 웹캠에서 라즈봇 카메라로 옮김. 처음엔 몸 일부만 보이면 잘 안 잡혀서 `MIN_CONFIDENCE` 0.5 -> 0.35. 반응이 느려서 감지 2초 -> 1초, 사라짐 3초 -> 1초.
+- 11/2: 인사 뒤 제자리 한 바퀴(바퀴 1.5초)를 시험했지만 팀 합의로 뺌. 고개는 2도씩 나눠서 천천히 움직이게 바꿈.
