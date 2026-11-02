@@ -21,8 +21,8 @@ STATE_PRESENT = "present"
 STATE_ABSENT = "absent"
 
 # 시간 기준 (초)
-DETECT_HOLD_SEC = 2      # 이만큼 계속 보이면 person_detected
-LEFT_HOLD_SEC = 3        # 이만큼 계속 안 보이면 person_left
+DETECT_HOLD_SEC = 1      # 이만큼 계속 보이면 person_detected
+LEFT_HOLD_SEC = 1        # 이만큼 계속 안 보이면 person_left
 ROBOT_TIMEOUT_SEC = 2    # 서버가 로봇 응답을 기다리는 최대 시간
 ROBOT_COOLDOWN_SEC = 10  # 로봇이 인사 후 다음 인사까지 쉬는 시간
 WEB_POLL_SEC = 0.5       # 웹 화면이 상태를 묻는 주기
