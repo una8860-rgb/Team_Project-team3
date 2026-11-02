@@ -29,6 +29,7 @@ BASE_ANGLE = 30   # 평소 각도: 정면(수평)
 BOW_ANGLE = 0     # 숙인 각도: 인사 (0 보다 작게는 못 감)
 PAN_CENTER = 78   # 좌우 정면 (10/31 다시 맞춤)
 BOW_HOLD_SEC = 1  # 숙인 채로 멈추는 시간
+GREET_WITH_DANCE = True  # True 면 인사 뒤에 율동까지 함 (11/2 팀 결정), False 면 인사만
 BOW_STEP_DEG = 2       # 인사할 때 고개를 한 번에 이만큼씩 나눠서 움직임
 BOW_STEP_SEC = 0.04    # 나눈 한 칸마다 쉬는 시간 (클수록 천천히, 30도 → 약 0.6초)
 FACE_FRONT_RETRY_SEC = 10  # 서버 시작 후 정면을 한 번 더 맞추기까지 기다리는 시간
@@ -83,15 +84,96 @@ def face_front():
 
 
 def greet():
-    """인사 동작: 천천히 숙이기 → 잠깐 멈춤 → 천천히 원위치. 그동안 사람 감지는 쉽니다."""
+    """인사 동작: 천천히 숙이기 → 잠깐 멈춤 → 원위치 → 율동. 그동안 사람 감지는 쉽니다."""
     _greeting.set()
     try:
         move_head_slowly(BASE_ANGLE, BOW_ANGLE)
         time.sleep(BOW_HOLD_SEC)
         move_head_slowly(BOW_ANGLE, BASE_ANGLE)
+        if GREET_WITH_DANCE:
+            dance_moves()
         face_front()
         time.sleep(0.5)  # 고개가 다 올라온 뒤에 감지를 다시 시작
     finally:
+        set_buzzer(False)  # 혹시 켜진 채 끝나지 않게
+        _greeting.clear()
+
+
+BUZZER_REG = 0x06
+DANCE_PAN_SWING = 25   # 도리도리 할 때 정면에서 좌우로 이만큼 돌림
+
+
+def set_buzzer(on):
+    """부저를 켜거나 끕니다."""
+    global _i2c
+    if mock_mode:
+        print(f"[테스트] 부저 {'켬' if on else '끔'}")
+        return
+    if _i2c is None:
+        import smbus
+        _i2c = smbus.SMBus(I2C_BUS)
+    _i2c.write_i2c_block_data(BOARD_ADDR, BUZZER_REG, [1 if on else 0])
+
+
+def beep(sec=0.08):
+    """부저를 sec 초 동안 짧게 울립니다."""
+    set_buzzer(True)
+    time.sleep(sec)
+    set_buzzer(False)
+
+
+def move_pan_slowly(start, end, step_deg=3, step_sec=0.02):
+    """고개를 좌우로 start 도에서 end 도까지 조금씩 나눠서 움직입니다."""
+    step = step_deg if end > start else -step_deg
+    for angle in range(start, end, step):
+        set_servo(PAN_SERVO_ID, angle)
+        time.sleep(step_sec)
+    set_servo(PAN_SERVO_ID, end)
+
+
+def dance_moves():
+    """율동 동작만 (약 8초): 끄덕끄덕 → 도리도리 → 갸우뚱 → 인사. 바퀴는 쓰지 않습니다."""
+    face_front()
+    time.sleep(0.3)
+    # 1) 끄덕끄덕 4번, 숙일 때마다 삐
+    for _ in range(4):
+        beep()
+        move_head_slowly(BASE_ANGLE, 12)
+        move_head_slowly(12, BASE_ANGLE)
+    # 2) 도리도리 2번
+    left, right = PAN_CENTER + DANCE_PAN_SWING, PAN_CENTER - DANCE_PAN_SWING
+    move_pan_slowly(PAN_CENTER, left)
+    for _ in range(2):
+        beep()
+        move_pan_slowly(left, right)
+        beep()
+        move_pan_slowly(right, left)
+    move_pan_slowly(left, PAN_CENTER)
+    # 3) 갸우뚱: 옆 보면서 살짝 숙였다가 반대쪽
+    for side in (left, right):
+        move_pan_slowly(PAN_CENTER, side)
+        move_head_slowly(BASE_ANGLE, 18)
+        time.sleep(0.3)
+        move_head_slowly(18, BASE_ANGLE)
+        move_pan_slowly(side, PAN_CENTER)
+    # 4) 마무리 인사 + 삐삐
+    move_head_slowly(BASE_ANGLE, BOW_ANGLE)
+    beep()
+    time.sleep(0.1)
+    beep()
+    time.sleep(0.6)
+    move_head_slowly(BOW_ANGLE, BASE_ANGLE)
+
+
+def dance():
+    """율동만 합니다 (POST /dance). 그동안 사람 감지는 쉽니다."""
+    _greeting.set()
+    try:
+        dance_moves()
+    finally:
+        set_buzzer(False)  # 혹시 켜진 채 끝나지 않게
+        face_front()
+        time.sleep(0.5)
         _greeting.clear()
 
 
@@ -99,6 +181,9 @@ def try_greet(reason):
     """쿨다운이 아니면 인사를 시작하고 True, 쿨다운 중이면 False 를 돌려줍니다."""
     global _last_greet_time
     with _greet_lock:
+        if _greeting.is_set():  # 인사·율동이 아직 안 끝났으면 겹치지 않게 건너뜀
+            print(f"인사 건너뜀 (동작 중), {reason}")
+            return False
         if time.time() - _last_greet_time < ROBOT_COOLDOWN_SEC:
             print(f"인사 건너뜀 (쿨다운 중), {reason}")
             return False
@@ -149,6 +234,15 @@ def greet_endpoint():
     event_id = (request.get_json(silent=True) or {}).get("event_id")
     if not try_greet(f"서버 명령 event_id={event_id}"):
         return jsonify(ok=True, skipped="cooldown")
+    return jsonify(ok=True)
+
+
+@app.post("/dance")
+def dance_endpoint():
+    """율동 명령을 받습니다. 인사나 율동 중이면 건너뜁니다."""
+    if _greeting.is_set():
+        return jsonify(ok=True, skipped="busy")
+    threading.Thread(target=dance, daemon=True).start()
     return jsonify(ok=True)
 
 
