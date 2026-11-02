@@ -15,10 +15,44 @@
 | 그 밖에 확인된 것 | 부저: 레지스터 `0x06` `[1]` 켬 / `[0]` 끔. 모터: 레지스터 `0x01` `[모터번호, 방향, 속도]` (0번 = 앞왼쪽) |
 | 스피커 | 없음 (HDMI 출력만 있음) → 인사 음성은 쓰지 않기로 함 (10/31) |
 | 전원 | 본체 배터리 + 전원 스위치. 서보·모터는 배터리 전원으로 움직임 |
-| 설치한 프로그램 | `python3-flask`, `python3-smbus`, `i2c-tools` (apt). `mpg123` 도 설치했지만 지금은 안 씀 |
+| 와이파이 | 유나 휴대폰 핫스팟 `Team3` (11/2 OS 새로 설치하면서 등록). 11/2 IP `10.199.49.250` |
+| 설치한 프로그램 | `python3-flask`, `python3-smbus`, `i2c-tools` (apt) |
+
+## OS 를 새로 설치했을 때 다시 할 일
+
+1. Raspberry Pi Imager: 사용자 `yuna`, 와이파이 `Team3`, SSH 사용 켜기
+2. 노트북 키 등록 (비밀번호 2번 입력, 경로는 노트북에 맞게):
+   ```
+   scp C:\Users\m8860\.ssh\id_ed25519.pub pi:laptop_key.pub
+   ssh pi "mkdir -p .ssh; cat laptop_key.pub > .ssh/authorized_keys; chmod 700 .ssh; chmod 600 .ssh/authorized_keys"
+   ```
+3. 코드와 서비스 파일 복사: `scp -r src/common src/robot pi:~/team3/src/`, `robot-greet.service` 를 `~/` 에
+4. 관리자 작업 (비밀번호 1번):
+   ```
+   ssh -t pi "sudo raspi-config nonint do_i2c 0 && sudo apt update && sudo apt install -y python3-flask && sudo cp ~/robot-greet.service /etc/systemd/system/ && sudo systemctl enable robot-greet && sudo reboot"
+   ```
+
+`robot-greet.service` 내용:
+```
+[Unit]
+Description=Team3 robot greet server
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=yuna
+WorkingDirectory=/home/yuna/team3
+ExecStart=/usr/bin/python3 -u src/robot/robot_server.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+```
 
 ## 고장 기록
 
 - 10/30: 서보가 전혀 안 움직임 → 서보 커넥터가 핀에 끼워지지 않고 옆에 놓여 있었음. 다시 꽂고 해결.
 - 10/31: 전원 켤 때 고개가 좌우로 한 번 튐 → 서보 특성. 서버가 켜지면서 정면으로 다시 맞춤. 인사 뒤 좌우가 틀어져서 인사 끝에 좌우도 정면으로 다시 보내게 바꿈.
 - 10/31: 전원 켜면 고개가 오른쪽을 보고 멈춤 → 보드가 서버보다 늦게 서보를 기본 위치로 보냄. 서버 시작 10초 뒤 정면을 한 번 더 맞추게 바꿔서 해결 (전원 껐다 켜서 확인).
+- 11/2: 장소 와이파이에서 라즈봇이 연결 안 됨 → 파이는 집 와이파이만 알고 있었음. 집 와이파이와 같은 이름의 핫스팟으로 시도했지만 실패, SD카드 리더로도 카드를 못 읽음. Raspberry Pi Imager 로 OS 를 새로 설치하면서 핫스팟 `Team3` 을 넣고, 위 "다시 할 일" 순서로 복구 (약 20분).
