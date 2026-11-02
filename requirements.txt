@@ -13,5 +13,7 @@ Flask==3.0.3
 streamlit==1.50.0
 
 # 중앙 서버 (src/server) — 한웅이 프레임워크를 정하면 추가
-# AI 감지 (src/ai) — 한웅이 모델·라이브러리를 정하면 추가
+# AI 감지 (src/ai) — 한웅 노트북에서 실행. YOLO26n 모델은 처음 실행 때 자동으로 받아짐
+ultralytics==8.4.198
+opencv-python==5.0.0.93
 # 라즈봇 서보 제어 — pip 라이브러리 필요 없음 (라즈베리파이에서 sudo apt install python3-smbus)
