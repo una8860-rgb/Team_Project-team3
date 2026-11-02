@@ -41,6 +41,7 @@ python src/ai/detect_person.py
 - 창에 웹캠 화면과 `state: PRESENT/ABSENT` 가 나옵니다. 끌 때는 창에서 `q`, 또는 PowerShell 에서 `Ctrl+C`.
 - 외장 웹캠이 안 잡히면 `--camera 1`
 - 창 없이 돌리려면 `--no-window` (메모리 절약)
+- 감지 기준을 줄여 시험하려면 `--detect-sec 1` (기본은 팀 기준 2초. 공용 값 `DETECT_HOLD_SEC` 는 그대로 둠)
 - 서버가 다른 노트북이면 `$env:SERVER_HOST="서버IP"; python src/ai/detect_person.py`
 
 ## 웹캠이 안 열릴 때
