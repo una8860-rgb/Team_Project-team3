@@ -6,6 +6,7 @@
 - 기준: 1초 이상 보이면 `person_detected`, 1초 이상 안 보이면 `person_left` (각 1번만, `src/common/protocol.py` 의 `DETECT_HOLD_SEC`, `LEFT_HOLD_SEC`)
 - 서버가 없을 때: 보낼 JSON을 콘솔에 출력하고 계속 돌아감
 - 마일스톤: `docs/milestones/M1-ai-server.md`
+- 11/2 변경: 시연 때 사람 감지는 라즈봇 카메라(`src/robot/person_detector.py`)가 합니다. 이 코드는 라즈봇 카메라가 안 될 때 노트북 웹캠으로 쓰는 예비용입니다.
 - 설계 메모 (감지 분류 초안, 한계, 개인정보): [`NOTES.md`](NOTES.md)
 
 ## 파일
