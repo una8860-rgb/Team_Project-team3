@@ -29,4 +29,4 @@
 - 영상은 가운데 재생 버튼을 눌러야 재생됩니다. 다른 장으로 넘어가면 멈춥니다.
 - 주소 끝에 `#7` 처럼 붙이면 그 장부터 열립니다.
 
-# 보기: src/app/presentation/index.html 을 브라우저로 열기
+# 보기: docs/presentation/index.html 을 브라우저로 열기
