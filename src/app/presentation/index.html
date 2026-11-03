@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>딴짓 보호 로봇 최종 발표</title>
+<meta name="description" content="3팀 최종 발표 · 딴짓 보호 로봇">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;background:#0E1013;overflow:hidden;font-family:'Noto Sans KR',Arial,sans-serif;word-break:keep-all;overflow-wrap:break-word}
+#view{position:absolute;inset:0;overflow:hidden}
+#stage{position:absolute;left:50%;top:50%;width:1920px;height:1080px;transform-origin:0 0}
+.slide{position:absolute;inset:0;width:1920px;height:1080px;overflow:hidden;opacity:0;visibility:hidden;transition:opacity .35s ease,visibility .35s}
+.slide.on{opacity:1;visibility:visible}
+.slide video{display:block}
+.vplay{position:absolute;left:50%;top:50%;width:144px;height:144px;margin:-72px 0 0 -72px;border:0;border-radius:50%;background:rgba(15,17,20,.62);cursor:pointer;transition:background .15s,opacity .15s}
+.vplay::before{content:"";position:absolute;left:56px;top:40px;border-style:solid;border-width:32px 0 32px 52px;border-color:transparent transparent transparent #fff}
+.vplay:hover{background:rgba(217,72,15,.9)}
+.vwrap.playing .vplay{opacity:0;pointer-events:none}
+#bar{position:fixed;left:0;right:0;bottom:0;height:52px;display:flex;align-items:center;justify-content:center;gap:12px;color:#B4B9C2;font-size:14px;background:linear-gradient(transparent,rgba(0,0,0,.65));opacity:0;transition:opacity .2s;z-index:5}
+body:hover #bar,#bar:focus-within{opacity:1}
+#bar button{background:rgba(255,255,255,.14);color:#F3F1EC;border:0;border-radius:8px;min-width:36px;height:32px;padding:0 12px;font:inherit;font-size:14px;cursor:pointer}
+#bar button:hover{background:rgba(255,255,255,.26)}
+#bar button[aria-pressed="true"]{background:#D9480F}
+#num{min-width:56px;text-align:center}
+#prog{position:fixed;left:0;top:0;height:3px;background:#D9480F;transition:width .3s;z-index:5}
+#notes{position:fixed;left:50%;bottom:64px;transform:translateX(-50%);width:min(960px,calc(100% - 32px));max-height:40vh;overflow:auto;background:rgba(20,22,26,.94);color:#F3F1EC;border-radius:14px;padding:20px 24px;font-size:18px;line-height:1.7;display:none;z-index:6;box-shadow:0 12px 32px rgba(0,0,0,.4)}
+#notes.open{display:block}
+#notes h4{font-size:13px;font-weight:700;color:#F08A5D;margin-bottom:6px}
+@media (hover:none){#bar{opacity:1}}
+/* 발표자 창 */
+body.presenter{background:#16181C;color:#F3F1EC}
+body.presenter #bar,body.presenter #prog{display:none}
+body.presenter #view{left:24px;top:24px;right:auto;bottom:auto;width:calc(58vw - 36px);height:calc((58vw - 36px) * 0.5625);border-radius:10px;background:#000}
+#pres{display:none}
+body.presenter #pres{display:flex;position:absolute;left:58vw;top:24px;right:24px;bottom:24px;flex-direction:column;gap:16px}
+body.presenter #pnext{position:absolute;left:24px;top:calc((58vw - 36px) * 0.5625 + 48px);width:calc(58vw - 36px);color:#B4B9C2;font-size:18px}
+#pres .top{display:flex;align-items:center;justify-content:space-between;font-size:16px;color:#B4B9C2}
+#pres .top b{font-size:28px;color:#F3F1EC}
+#ptext{flex:1;overflow:auto;font-size:26px;line-height:1.7;background:#1F2329;border-radius:12px;padding:24px 28px}
+#pres .btns{display:flex;gap:12px}
+#pres .btns button{flex:1;height:56px;border:0;border-radius:10px;background:#2A2F37;color:#F3F1EC;font:inherit;font-size:18px;cursor:pointer}
+#pres .btns button:hover{background:#3A404A}
+#ptimer{font-variant-numeric:tabular-nums}
+</style>
+</head>
+<body>
+<div id="prog"></div>
+<div id="view"><div id="stage">
+<section class="slide" id="cover" data-transition="fade" style="background:#1F2329;color:#F3F1EC;font-family:'Noto Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="position:absolute;left:0;top:0;width:24px;height:1080px;background:#D9480F"></div>
+<p style="font-size:32px;color:#B4B9C2;font-weight:500">3팀 최종 발표 · 2026. 11. 3.</p>
+<div style="display:flex;flex-direction:column;gap:32px">
+<h1 style="font-size:120px;font-weight:900;line-height:1.1;letter-spacing:-2px">딴짓 보호 로봇</h1>
+<p style="font-size:44px;line-height:1.4;color:#F3F1EC">누가 다가오면 화면은 엑셀로, 로봇은 인사를</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:72px">
+<p style="font-size:32px;color:#B4B9C2"><b><span style="color:#F3F1EC">한웅</span></b>  AI · 서버</p>
+<p style="font-size:32px;color:#B4B9C2"><b><span style="color:#F3F1EC">유나</span></b>  로봇 · 팀장</p>
+<p style="font-size:32px;color:#B4B9C2"><b><span style="color:#F3F1EC">채웅</span></b>  웹</p>
+<p style="font-size:32px;color:#B4B9C2"><b><span style="color:#F3F1EC">채연</span></b>  앱 · 발표</p>
+</div>
+
+</section>
+<section class="slide" id="problem" data-transition="fade" style="background:#F3ECE3;color:#1F2329;font-family:'Noto Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="display:flex;flex-direction:column;gap:24px">
+<p style="font-size:32px;font-weight:700;color:#C2410C">문제 의식</p>
+<h2 style="font-size:72px;font-weight:900;line-height:1.15;letter-spacing:-1px">직장에서 딴짓을 하다가 누가 다가오면?</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FDFAF6;border:2px solid #E6D9CA;border-top:8px solid #E08A5F;border-radius:24px;padding:36px 40px"><h3 style="font-size:44px;font-weight:700">Alt + Tab</h3><p style="font-size:32px;line-height:1.45;color:#5B6270">딴짓을 지키는 필수 스킬</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FDFAF6;border:2px solid #E6D9CA;border-top:8px solid #E08A5F;border-radius:24px;padding:36px 40px"><h3 style="font-size:44px;font-weight:700">계속 곁눈질</h3><p style="font-size:32px;line-height:1.45;color:#5B6270">누가 오는지 늘 살펴야 함</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:12px;background:#FDFAF6;border:2px solid #E6D9CA;border-top:8px solid #E08A5F;border-radius:24px;padding:36px 40px"><h3 style="font-size:44px;font-weight:700">1초만 늦어도</h3><p style="font-size:32px;line-height:1.45;color:#5B6270">판단이 늦으면 들킴</p></div>
+</div>
+<div style="display:flex;flex-direction:row;align-items:center;gap:40px;background:#1F2329;border-radius:24px;padding:32px 48px">
+<p style="font-size:32px;font-weight:700;color:#F08A5D;white-space:nowrap">그래서 만들었습니다</p>
+<h3 style="font-size:72px;font-weight:900;line-height:1.1;letter-spacing:-1px;color:#F3F1EC;white-space:nowrap">딴짓 보호 로봇</h3>
+<p style="flex:1;font-size:24px;line-height:1.5;color:#B4B9C2">상사가 다가오면 로봇이 먼저 알아채고, 화면을 숨기고, 대신 인사합니다</p>
+</div>
+
+</section>
+<section class="slide" id="demo" data-transition="fade" style="display:flex; flex-direction:row; gap:64px; align-items:center; padding:128px; background:#1f2329">
+  <div style="width:440px; display:flex; flex-direction:column; gap:32px">
+    <div style="display:flex; flex-direction:column; gap:16px">
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#f08a5d">시연 영상</p>
+      <h2 style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:72px; font-weight:700; line-height:1.15; color:#f3f1ec">실제로 붙여 봤습니다</h2>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px">
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.5; color:#b4b9c2">1 노트북으로 딴짓 중</p>
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.5; color:#b4b9c2">2 팀원이 라즈봇 쪽으로 다가옴</p>
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.5; color:#b4b9c2">3 라즈봇이 감지하고 인사, 율동</p>
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.5; color:#b4b9c2">4 화면이 엑셀로 바뀌고 인사 음성</p>
+    </div>
+  </div>
+  <div class="vwrap" style="width:1160px; height:653px; background:#2e333b; border-radius:20px;position:relative;overflow:hidden"><video src="media/full.mp4" poster="media/still_full.jpg" data-sound="on" loop playsinline controls preload="metadata" aria-label="시연 영상: 팀원이 다가오자 라즈봇이 인사하고 노트북 화면이 엑셀로 바뀜" style="width:100%;height:100%;object-fit:cover;border-radius:20px"></video><button class="vplay" aria-label="영상 재생"></button></div>
+  
+</section>
+<section class="slide" id="system" data-transition="fade" style="background:#F6F5F1;color:#1F2329;font-family:'Noto Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;color:#D9480F">파트 1 · 한웅 · 중앙 서버와 전체 구조</p>
+<h2 style="font-size:72px;font-weight:700;line-height:1.15">모든 기기는 중앙 서버 하나를 거쳐 연결됩니다</h2>
+</div>
+
+<div style="position:relative;width:1664px;height:600px"><svg width="1664" height="600" style="position:absolute;left:0;top:0;overflow:visible;pointer-events:none"><polyline points="360.0,300.0 638.0,300.0" fill="none" stroke="#D9480F" stroke-width="3"/><polygon points="652.0,300.0 638.0,291.6 638.0,308.4" fill="#D9480F"/><polyline points="1304.0,150.0 832.0,150.0 832.0,211.0" fill="none" stroke="#5B6270" stroke-width="3"/><polygon points="832.0,225.0 823.6,211.0 840.4,211.0" fill="#5B6270"/><polyline points="1304.0,450.0 832.0,450.0 832.0,389.0" fill="none" stroke="#5B6270" stroke-width="3"/><polygon points="832.0,375.0 840.4,389.0 823.6,389.0" fill="#5B6270"/></svg>
+<div style="position:absolute;left:0;top:225px;width:360px;height:150px;background:#FDFCF9;border:2px solid #D9480F;border-radius:20px;padding:28px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="font-size:32px;font-weight:700;line-height:1.2">라즈봇</h3><p style="font-size:24px;color:#5B6270">카메라 감지 · 유나</p></div>
+<div style="position:absolute;left:652px;top:225px;width:360px;height:150px;background:#1F2329;border-radius:20px;padding:28px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="font-size:32px;font-weight:700;line-height:1.2;color:#F3F1EC">중앙 서버</h3><p style="font-size:24px;color:#B4B9C2">기록 저장 · 한웅</p></div>
+<div style="position:absolute;left:1304px;top:75px;width:360px;height:150px;background:#FDFCF9;border:2px solid #C9C5BA;border-radius:20px;padding:28px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="font-size:32px;font-weight:700;line-height:1.2">웹 화면</h3><p style="font-size:24px;color:#5B6270">엑셀로 전환 · 채웅</p></div>
+<div style="position:absolute;left:1304px;top:375px;width:360px;height:150px;background:#FDFCF9;border:2px solid #C9C5BA;border-radius:20px;padding:28px;display:flex;flex-direction:column;justify-content:center;gap:8px"><h3 style="font-size:32px;font-weight:700;line-height:1.2">언더커버 앱</h3><p style="font-size:24px;color:#5B6270">알림 · 기록 · 채연</p></div>
+<p style="position:absolute;left:376px;top:244px;width:260px;font-size:24px;font-weight:700;color:#1F2329">POST /api/events</p>
+<p style="position:absolute;left:376px;top:318px;width:260px;font-size:24px;color:#5B6270">감지 · 떠남 보냄</p>
+<p style="position:absolute;left:0;top:395px;width:360px;font-size:24px;line-height:1.4;color:#D9480F;font-weight:700">감지하면 그 자리에서<br>바로 인사</p>
+<p style="position:absolute;left:856px;top:96px;width:430px;font-size:24px;color:#5B6270"><b><span style="color:#1F2329">GET /api/status</span></b> · 0.5초마다</p>
+<p style="position:absolute;left:856px;top:466px;width:430px;font-size:24px;color:#5B6270"><b><span style="color:#1F2329">GET /api/events</span></b> · 2초마다</p>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between"><p style="font-size:24px;color:#8A909A">주황 화살표: 라즈봇이 서버에 보냄 · 회색 화살표: 웹과 앱이 서버에 물어봄</p><p style="font-size:24px;color:#8A909A">4</p></div>
+
+</section>
+<section class="slide" id="robot" data-transition="fade" style="display:flex; flex-direction:column; gap:48px; padding:128px 128px 160px; background:#f6f5f1">
+  <div style="display:flex; flex-direction:column; gap:16px">
+    <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#d9480f">파트 2 · 유나 · 로봇</p>
+    <h2 style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:72px; font-weight:700; line-height:1.15; color:#1f2329">사람을 보면 로봇이 먼저 인사합니다</h2>
+  </div>
+  <div style="display:flex; flex-direction:row; gap:64px; flex:1">
+    <div class="vwrap" style="width:760px; height:428px; align-self:center; background:#e4e1d8; border-radius:24px;position:relative;overflow:hidden"><video src="media/robot.mp4" poster="media/still_robot.jpg" muted loop playsinline controls preload="metadata" aria-label="치이카와 얼굴을 붙인 라즈봇이 고개를 숙여 인사하는 영상" style="width:100%;height:100%;object-fit:cover;border-radius:24px"></video><button class="vplay" aria-label="영상 재생"></button></div>
+    <div style="display:flex; flex-direction:column; justify-content:center; flex:1">
+      <div style="display:flex; flex-direction:row; gap:24px; padding:20px 0; border-top:2px solid #dedbd2">
+        <p style="width:48px; font-family:'Noto Sans KR', Arial, sans-serif; font-size:32px; font-weight:700; color:#d9480f">1</p>
+        <div style="display:flex; flex-direction:column; gap:4px; flex:1">
+          <h3 style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:32px; font-weight:700; color:#1f2329">사람이 1초 보이면</h3>
+          <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.5; color:#5b6270">인사를 시작하고, 서버에 "사람 왔음"을 보내요</p>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:row; gap:24px; padding:20px 0; border-top:2px solid #dedbd2">
+        <p style="width:48px; font-family:'Noto Sans KR', Arial, sans-serif; font-size:32px; font-weight:700; color:#d9480f">2</p>
+        <div style="display:flex; flex-direction:column; gap:4px; flex:1">
+          <h3 style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:32px; font-weight:700; color:#1f2329">대신 인사 전달</h3>
+          <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.5; color:#5b6270">귀여운 치이카와 TTS로 인사를 전달해요!</p>
+        </div>
+      </div>
+      <div style="display:flex; flex-direction:row; gap:24px; padding:20px 0; border-top:2px solid #dedbd2; border-bottom:2px solid #dedbd2">
+        <p style="width:48px; font-family:'Noto Sans KR', Arial, sans-serif; font-size:32px; font-weight:700; color:#d9480f">3</p>
+        <div style="display:flex; flex-direction:column; gap:4px; flex:1">
+          <h3 style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:32px; font-weight:700; color:#1f2329">고개 숙여 인사하고 율동</h3>
+          <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.5; color:#5b6270">도리도리, 끄덕끄덕, 두리번, 신나게 중 하나</p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div style="position:absolute; top:322px; left:600px; width:320px; display:flex; flex-direction:column; gap:6px; padding:22px 26px; background:#ffe7a3; border-radius:14px; box-shadow:0 10px 24px #1f23292e; transform:rotate(-4deg)">
+    <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#d9480f">메모</p>
+    <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:32px; font-weight:900; line-height:1.25; color:#1f2329">로봇에 자아 생성!</p>
+    <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.45; color:#3e4450">귀여운 치이카와 얼굴을 붙였어요</p>
+  </div>
+  <div style="position:absolute; right:128px; bottom:64px; left:128px; display:flex; flex-direction:row; justify-content:space-between">
+    <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; color:#8a909a">인사와 율동 약 3초 · 인사 뒤 10초는 다시 인사 안 함 · 인사 음성은 노트북에서 재생</p>
+    <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; color:#8a909a">5</p>
+  </div>
+  
+</section>
+<section class="slide" id="robot-how" data-transition="fade" style="background:#F6F5F1;color:#1F2329;font-family:'Noto Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;color:#D9480F">파트 2 · 유나 · 어떻게 만들었나</p>
+<h2 style="font-size:72px;font-weight:700;line-height:1.15">카메라로 보고, 모터로 고개를 숙입니다</h2>
+</div>
+<div style="display:flex;flex-direction:row;align-items:stretch;gap:16px">
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF9;border:2px solid #DEDBD2;border-top:8px solid #D9480F;border-radius:20px;padding:32px"><p style="font-size:24px;font-weight:700;color:#D9480F">1 보기</p><h3 style="font-size:32px;font-weight:700">USB 카메라</h3><p style="font-size:24px;line-height:1.5;color:#5B6270">640 x 480 화면을 계속 읽음</p></div>
+<svg viewBox="0 0 48 24" style="width:48px;height:24px;align-self:center;flex:none"><path d="M0 8h32V0l16 12-16 12v-8H0z" fill="#C9C5BA"/></svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF9;border:2px solid #DEDBD2;border-top:8px solid #D9480F;border-radius:20px;padding:32px"><p style="font-size:24px;font-weight:700;color:#D9480F">2 판단</p><h3 style="font-size:32px;font-weight:700">MobileNet-SSD</h3><p style="font-size:24px;line-height:1.5;color:#5B6270">OpenCV로 돌려서 사람인지만 봄</p></div>
+<svg viewBox="0 0 48 24" style="width:48px;height:24px;align-self:center;flex:none"><path d="M0 8h32V0l16 12-16 12v-8H0z" fill="#C9C5BA"/></svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF9;border:2px solid #DEDBD2;border-top:8px solid #D9480F;border-radius:20px;padding:32px"><p style="font-size:24px;font-weight:700;color:#D9480F">3 기준</p><h3 style="font-size:32px;font-weight:700">1초 / 1초</h3><p style="font-size:24px;line-height:1.5;color:#5B6270">1초 보이면 감지, 1초 안 보이면 떠남</p></div>
+<svg viewBox="0 0 48 24" style="width:48px;height:24px;align-self:center;flex:none"><path d="M0 8h32V0l16 12-16 12v-8H0z" fill="#C9C5BA"/></svg>
+<div style="flex:1;display:flex;flex-direction:column;gap:10px;background:#FDFCF9;border:2px solid #DEDBD2;border-top:8px solid #D9480F;border-radius:20px;padding:32px"><p style="font-size:24px;font-weight:700;color:#D9480F">4 움직이기</p><h3 style="font-size:32px;font-weight:700">서보 모터</h3><p style="font-size:24px;line-height:1.5;color:#5B6270">I2C로 각도를 보내 30도에서 0도로, 2도씩</p></div>
+</div>
+<div style="display:flex;flex-direction:row;gap:32px">
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-left:6px solid #1F2329;padding:4px 0 4px 28px"><h3 style="font-size:32px;font-weight:700">영상은 저장하지 않음</h3><p style="font-size:24px;line-height:1.5;color:#5B6270">카메라 화면은 메모리에서만 보고 버림. 누구인지는 알아보지 않음</p></div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;border-left:6px solid #1F2329;padding:4px 0 4px 28px"><h3 style="font-size:32px;font-weight:700">켜기만 하면 실행</h3><p style="font-size:24px;line-height:1.5;color:#5B6270">전원을 켜면 자동 실행(systemd), 멈추면 3초 뒤 다시 켜짐</p></div>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between"><p style="font-size:24px;color:#8A909A">라즈봇 V2 (라즈베리파이 5)</p><p style="font-size:24px;color:#8A909A">6</p></div>
+
+</section>
+<section class="slide" id="web" data-transition="fade" style="background:#F6F5F1;color:#1F2329;font-family:'Noto Sans KR', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:48px">
+<div style="display:flex;flex-direction:column;gap:16px">
+<p style="font-size:24px;font-weight:700;color:#D9480F">파트 3 · 채웅 · 웹 화면</p>
+<h2 style="font-size:72px;font-weight:700;line-height:1.15">사람이 오면 엑셀 창이 맨 앞으로 뜹니다</h2>
+</div>
+<div style="display:flex;flex-direction:row;gap:64px;flex:1">
+<div class="vwrap" style="width:960px;height:540px;object-fit:cover;border-radius:24px;background:#E4E1D8;align-self:center;position:relative;overflow:hidden"><video src="media/web.mp4" poster="media/still_web.jpg" data-sound="on" loop playsinline controls preload="metadata" aria-label="노트북 화면이 유튜브에서 엑셀로 바뀌었다가 돌아오는 영상" style="width:100%;height:100%;object-fit:cover;border-radius:24px"></video><button class="vplay" aria-label="영상 재생"></button></div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:32px">
+<div style="display:flex;flex-direction:column;gap:6px"><h3 style="font-size:32px;font-weight:700">다른 작업 중에도</h3><p style="font-size:24px;line-height:1.5;color:#5B6270">엑셀 팝업이 전체 화면으로 뜨고, 사람이 가면 하던 창으로</p></div>
+<div style="display:flex;flex-direction:column;gap:6px"><h3 style="font-size:32px;font-weight:700">진짜처럼 쓰는 엑셀</h3><p style="font-size:24px;line-height:1.5;color:#5B6270">셀 입력, 수식 계산, 리본 메뉴가 실제로 동작</p></div>
+<div style="display:flex;flex-direction:column;gap:6px"><h3 style="font-size:32px;font-weight:700">탭 이름도 엑셀로</h3><p style="font-size:24px;line-height:1.5;color:#5B6270">브라우저 탭 제목과 아이콘까지 바뀜</p></div>
+</div>
+</div>
+<div style="position:absolute;left:128px;right:128px;bottom:64px;display:flex;flex-direction:row;justify-content:space-between"><p style="font-size:24px;color:#8A909A">상태 확인: 웹 화면 0.5초, 엑셀 팝업 0.1초마다</p><p style="font-size:24px;color:#8A909A">7</p></div>
+
+</section>
+<section class="slide" id="dash-overview" data-transition="fade" style="background:#F6F5F1;color:#1F2329;font-family:'Noto Sans KR', Arial, sans-serif;padding:48px 64px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:24px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:20px">
+<p style="font-size:24px;font-weight:700;color:#D9480F">파트 3 · 채웅 · 대시보드</p>
+<h2 style="font-size:44px;font-weight:700;line-height:1.2">감지 기록을 한 화면에서 봅니다</h2>
+</div>
+<p style="font-size:24px;color:#8A909A">8</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:24px">
+<div style="position:relative;width:1475px;height:922px">
+<img src="media/6d225055d71ebe27e80bb3b626a0f583.png" alt="대시보드 전체 화면: 위쪽 숫자 카드 4개, 가운데 오늘의 타임라인, 아래 시간대별 감지 횟수와 최근 7일 그래프" style="position:absolute;left:0;top:0;width:1475px;height:922px;object-fit:contain;border:2px solid #DEDBD2;border-radius:16px;background:#F3F5F8">
+<p style="position:absolute;left:6px;top:130px;width:48px;height:48px;font-size:24px;font-weight:700;line-height:2;text-align:center;color:#FBF7F2;background:#D9480F;border-radius:50%">1</p>
+<p style="position:absolute;left:6px;top:296px;width:48px;height:48px;font-size:24px;font-weight:700;line-height:2;text-align:center;color:#FBF7F2;background:#D9480F;border-radius:50%">2</p>
+<p style="position:absolute;left:6px;top:538px;width:48px;height:48px;font-size:24px;font-weight:700;line-height:2;text-align:center;color:#FBF7F2;background:#D9480F;border-radius:50%">3</p>
+<p style="position:absolute;left:998px;top:18px;width:48px;height:48px;font-size:24px;font-weight:700;line-height:2;text-align:center;color:#FBF7F2;background:#D9480F;border-radius:50%">4</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px">
+<p style="font-size:24px;line-height:1.45"><b><span style="color:#D9480F">1</span>  숫자 카드</b><br><span style="color:#5B6270">횟수, 상태, 마지막 감지, 머문 시간</span></p>
+<p style="font-size:24px;line-height:1.45"><b><span style="color:#D9480F">2</span>  타임라인</b><br><span style="color:#5B6270">사람이 있던 구간</span></p>
+<p style="font-size:24px;line-height:1.45"><b><span style="color:#D9480F">3</span>  그래프</b><br><span style="color:#5B6270">시간대별, 최근 7일</span></p>
+<p style="font-size:24px;line-height:1.45"><b><span style="color:#D9480F">4</span>  위쪽 버튼</b><br><span style="color:#5B6270">날짜, 크게 보기, 어두운 화면</span></p>
+<p style="font-size:24px;line-height:1.45"><b><span style="color:#D9480F">+</span>  아래쪽</b><br><span style="color:#5B6270">기록 표, 엑셀로 내보내기</span></p>
+<p style="font-size:24px;line-height:1.45;color:#8A909A">화면 예시 (시험 데이터)</p>
+</div>
+</div>
+
+</section>
+<section class="slide" id="dash-compare" data-transition="fade" style="background:#F6F5F1;color:#1F2329;font-family:'Noto Sans KR', Arial, sans-serif;padding:48px 64px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:24px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:20px">
+<p style="font-size:24px;font-weight:700;color:#D9480F">파트 3 · 채웅 · 대시보드</p>
+<h2 style="font-size:44px;font-weight:700;line-height:1.2">사람이 오면 2초 안에 이렇게 바뀝니다</h2>
+</div>
+<p style="font-size:24px;color:#8A909A">9</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:48px">
+<div style="display:flex;flex-direction:column;gap:22px">
+<div style="display:flex;flex-direction:column;gap:6px">
+<p style="font-size:24px;font-weight:700;color:#1E7A4C">사람이 없을 때</p>
+<img src="media/b5e4f50603ad5e997c2d07b1b3c7ac5f.png" alt="사람이 없는 대시보드: 현재 상태 사람 없음, 마지막 감지 16시 24분, 타임라인에 다녀간 구간 막대" style="width:1093px;height:410px;object-fit:contain;border:2px solid #DEDBD2;border-radius:16px;background:#F3F5F8">
+</div>
+<div style="display:flex;flex-direction:column;gap:6px">
+<p style="font-size:24px;font-weight:700;color:#D9480F">사람이 왔을 때</p>
+<div style="position:relative;width:1093px;height:410px">
+<img src="media/b90d29a8d909c54ad3db7f5f0c634333.png" alt="사람이 감지된 대시보드: 오른쪽 위 알림, 현재 상태 사람 있음, 감지 횟수 6회, 타임라인에 지금 머무는 중 빗금" style="position:absolute;left:0;top:0;width:1093px;height:410px;object-fit:contain;border:3px solid #D9480F;border-radius:16px;background:#F3F5F8">
+<p style="position:absolute;left:832px;top:41px;width:48px;height:48px;font-size:24px;font-weight:700;line-height:2;text-align:center;color:#FBF7F2;background:#D9480F;border-radius:50%">1</p>
+<p style="position:absolute;left:266px;top:95px;width:48px;height:48px;font-size:24px;font-weight:700;line-height:2;text-align:center;color:#FBF7F2;background:#D9480F;border-radius:50%">2</p>
+<p style="position:absolute;left:531px;top:95px;width:48px;height:48px;font-size:24px;font-weight:700;line-height:2;text-align:center;color:#FBF7F2;background:#D9480F;border-radius:50%">3</p>
+<p style="position:absolute;left:989px;top:274px;width:48px;height:48px;font-size:24px;font-weight:700;line-height:2;text-align:center;color:#FBF7F2;background:#D9480F;border-radius:50%">4</p>
+</div>
+</div>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:28px">
+<p style="font-size:24px;line-height:1.45"><b><span style="color:#D9480F">1</span>  알림</b><br><span style="color:#5B6270">"사람이 감지되었습니다"가 5초 동안 뜸</span></p>
+<p style="font-size:24px;line-height:1.45"><b><span style="color:#D9480F">2</span>  현재 상태</b><br><span style="color:#5B6270">"사람 없음" → "사람 있음", 카드 강조</span></p>
+<p style="font-size:24px;line-height:1.45"><b><span style="color:#D9480F">3</span>  마지막 감지</b><br><span style="color:#5B6270">시각이 바뀌고 횟수 +1</span></p>
+<p style="font-size:24px;line-height:1.45"><b><span style="color:#D9480F">4</span>  타임라인</b><br><span style="color:#5B6270">"지금 머무는 중" 빗금 막대</span></p>
+<p style="font-size:24px;line-height:1.45;color:#8A909A">화면 예시 (시험 데이터)</p>
+</div>
+</div>
+
+</section>
+<section class="slide" id="app-honest" data-transition="fade" style="display:flex; flex-direction:column; gap:8px; padding:48px 64px; background:#f6f5f1">
+  <div style="display:flex; flex-direction:row; gap:24px; align-items:center; justify-content:space-between">
+    <div style="display:flex; flex-direction:row; gap:12px; align-items:center">
+      <p style="padding:6px 24px; font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#fbf7f2; background:#2457d6; border-radius:256px">홈 화면</p>
+      <p style="padding:4px 22px; font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#8a909a; border:2px solid #c9c5ba; border-radius:256px">기록 화면</p>
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#d9480f">파트 4 · 채연 · 앱 언더커버</p>
+      <h2 style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:44px; font-weight:700; line-height:1.2; color:#1f2329">지금 누가 있는지 바로 보여 줍니다</h2>
+    </div>
+    <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; color:#8a909a">10</p>
+  </div>
+  <div style="display:flex; flex-direction:row; gap:40px">
+    <div style="display:flex; flex-direction:column; gap:32px; justify-content:center; flex:1">
+      <div style="display:flex; flex-direction:column; gap:6px; padding:4px 0 4px 24px; border-left:6px solid #1e7a4c">
+        <h3 style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:32px; font-weight:700; color:#1f2329">아무도 없을 때</h3>
+        <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.5; color:#5b6270">초록 카드, 몇 분째 조용한지</p>
+      </div>
+      <div style="display:flex; flex-direction:column; gap:6px; padding:4px 0 4px 24px; border-left:6px solid #d9480f">
+        <h3 style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:32px; font-weight:700; color:#1f2329">누가 오면</h3>
+        <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.5; color:#5b6270">2초 안에 주황 카드와 알림, 위장 모드 버튼에 주황 점</p>
+      </div>
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.5; color:#5b6270">카드 아래에는 오늘 방문 횟수, 마지막 시각, 최근 기록 3개</p>
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.5; color:#8a909a">앱 아래쪽 탭으로 홈 화면과 기록 화면을 오감</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px; align-items:center">
+      <img src="media/8c3cce4afe17e4427a717b861c210e48.png" alt="홈 화면: 초록 카드 지금 아무도 없어요, 2시간 38분째 조용해요" style="width:591px; height:880px; background:#ffffff; border:3px solid #2457d6; border-radius:28px; object-fit:contain">
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#1f2329"><span style="color:#2457d6">홈 화면</span> · 아무도 없음</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:8px; align-items:center">
+      <img src="media/ad3ceed5883ddc2676f89cdf0a073f90.png" alt="홈 화면: 주황 카드 누가 왔어요, 오후 4시 48분부터 자리에 있어요" style="width:591px; height:880px; background:#ffffff; border:3px solid #2457d6; border-radius:28px; object-fit:contain">
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#1f2329"><span style="color:#2457d6">홈 화면</span> · 누가 왔어요</p>
+    </div>
+  </div>
+  
+</section>
+<section class="slide" id="app-log" data-transition="fade" style="background:#F6F5F1;color:#1F2329;font-family:'Noto Sans KR', Arial, sans-serif;padding:48px 64px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:24px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:12px">
+<p style="font-size:24px;font-weight:700;color:#8A909A;border:2px solid #C9C5BA;border-radius:999px;padding:4px 22px">홈 화면</p>
+<p style="font-size:24px;font-weight:700;color:#FBF7F2;background:#1E7A4C;border-radius:999px;padding:6px 24px">기록 화면</p>
+<p style="font-size:24px;font-weight:700;color:#D9480F">파트 4 · 채연 · 앱 언더커버</p>
+<h2 style="font-size:44px;font-weight:700;line-height:1.2">언제 와서 얼마나 있었는지</h2>
+</div>
+<p style="font-size:24px;color:#8A909A">11</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:32px">
+<div style="display:flex;flex-direction:column;gap:6px;border-left:6px solid #1E7A4C;padding:4px 0 4px 24px"><h3 style="font-size:32px;font-weight:700">방문 기록</h3><p style="font-size:24px;line-height:1.5;color:#5B6270">온 시각부터 간 시각, 머문 시간. 지금 있으면 "진행 중"</p></div>
+<div style="display:flex;flex-direction:column;gap:6px;border-left:6px solid #1E7A4C;padding:4px 0 4px 24px"><h3 style="font-size:32px;font-weight:700">날짜별 기록</h3><p style="font-size:24px;line-height:1.5;color:#5B6270">달력을 펼치면 날짜마다 방문 횟수. 날짜를 누르면 그날 기록</p></div>
+<p style="font-size:24px;line-height:1.5;color:#8A909A">서버의 "왔음", "갔음" 기록 2개를 방문 1번으로 묶어서 보여 줌</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;align-items:center"><img src="media/b78691e7cd06c49e25de728eb08a8642.png" alt="기록 화면: 주간 날짜 줄, 오늘 방문 3회, 방문 기록 목록" style="width:591px;height:880px;object-fit:contain;border:3px solid #1E7A4C;border-radius:28px;background:#FFFFFF"><p style="font-size:24px;font-weight:700"><span style="color:#1E7A4C">기록 화면</span> · 방문 기록</p></div>
+<div style="display:flex;flex-direction:column;gap:8px;align-items:center"><img src="media/beadfd285efe38a3a93b57beb2d5bf7d.png" alt="기록 화면: 2026년 11월 한 달 달력, 날짜 밑에 방문 횟수" style="width:591px;height:880px;object-fit:contain;border:3px solid #1E7A4C;border-radius:28px;background:#FFFFFF"><p style="font-size:24px;font-weight:700"><span style="color:#1E7A4C">기록 화면</span> · 달력 펼치기</p></div>
+</div>
+
+</section>
+<section class="slide" id="app-disguise" data-transition="fade" style="background:#F6F5F1;color:#1F2329;font-family:'Noto Sans KR', Arial, sans-serif;padding:48px 64px;display:flex;flex-direction:column;gap:8px">
+<div style="display:flex;flex-direction:row;align-items:center;justify-content:space-between;gap:24px">
+<div style="display:flex;flex-direction:row;align-items:center;gap:12px">
+<p style="font-size:24px;font-weight:700;color:#FBF7F2;background:#1F2329;border-radius:999px;padding:6px 24px">위장 모드</p>
+<p style="font-size:24px;font-weight:700;color:#D9480F">파트 4 · 채연 · 앱 언더커버</p>
+<h2 style="font-size:44px;font-weight:700;line-height:1.2">두 화면 모두 업무 캘린더로</h2>
+</div>
+<p style="font-size:24px;color:#8A909A">12</p>
+</div>
+<div style="display:flex;flex-direction:row;gap:40px">
+<div style="flex:1;display:flex;flex-direction:column;justify-content:center;gap:20px">
+<p style="font-size:24px;line-height:1.5">오른쪽 위 버튼 한 번이면 바뀌고, 다시 누르면 돌아옵니다</p>
+<div style="display:flex;flex-direction:column">
+<div style="display:flex;flex-direction:row;gap:16px;padding:12px 0;border-top:2px solid #DEDBD2"><p style="font-size:24px;width:170px;color:#5B6270">아무도 없음</p><p style="font-size:24px;font-weight:700">집중 시간</p></div>
+<div style="display:flex;flex-direction:row;gap:16px;padding:12px 0;border-top:2px solid #DEDBD2"><p style="font-size:24px;width:170px;color:#5B6270">누가 와 있음</p><p style="font-size:24px;font-weight:700;color:#D9480F">회의 시작</p></div>
+<div style="display:flex;flex-direction:row;gap:16px;padding:12px 0;border-top:2px solid #DEDBD2"><p style="font-size:24px;width:170px;color:#5B6270">왔다 감</p><p style="font-size:24px;font-weight:700">잠깐 미팅</p></div>
+<div style="display:flex;flex-direction:row;gap:16px;padding:12px 0;border-top:2px solid #DEDBD2;border-bottom:2px solid #DEDBD2"><p style="font-size:24px;width:170px;color:#5B6270">방문 기록</p><p style="font-size:24px;font-weight:700">미팅 기록</p></div>
+</div>
+<p style="font-size:24px;line-height:1.5;color:#8A909A">사람이 와 있는데 위장 모드가 꺼져 있으면 버튼에 주황 점이 깜빡임</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;align-items:center"><img src="media/9109cf0dba4a583c399a10114031eb49.png" alt="위장 모드 홈 화면: 업무 캘린더에 회의 시작 오후 4시 48분부터" style="width:591px;height:880px;object-fit:contain;border:3px solid #2457D6;border-radius:28px;background:#FFFFFF"><p style="font-size:24px;font-weight:700"><span style="color:#2457D6">홈 화면</span> · 회의 시작</p></div>
+<div style="display:flex;flex-direction:column;gap:8px;align-items:center"><img src="media/ea9d529d0241e7bd5cb748ff23068c58.png" alt="위장 모드 기록 화면: 오늘 미팅 3회, 미팅 기록 목록" style="width:591px;height:880px;object-fit:contain;border:3px solid #1E7A4C;border-radius:28px;background:#FFFFFF"><p style="font-size:24px;font-weight:700"><span style="color:#1E7A4C">기록 화면</span> · 미팅 기록</p></div>
+</div>
+
+</section>
+<section class="slide" id="lessons" data-transition="fade" style="display:flex; flex-direction:column; gap:24px; padding:128px 128px 160px; background:#f6f5f1">
+  <div style="display:flex; flex-direction:column; gap:16px">
+    <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#d9480f">어려웠던 점과 해결</p>
+    <h2 style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:72px; font-weight:700; line-height:1.15; color:#1f2329">막힌 곳과 푼 방법</h2>
+  </div>
+  <div style="display:flex; flex-direction:column">
+    <div style="display:flex; flex-direction:row; gap:32px; padding:0 0 12px">
+      <p style="width:140px; font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#8a909a">팀원</p>
+      <p style="flex:1; font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#d9480f">막힌 곳</p>
+      <p style="flex:1; font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#1e7a4c">푼 방법</p>
+    </div>
+    <div style="display:flex; flex-direction:row; gap:32px; padding:12px 0; border-top:2px solid #dedbd2">
+      <p style="width:140px; padding:0 0 0 16px; font-family:'Noto Sans KR', Arial, sans-serif; font-size:32px; font-weight:700; color:#1f2329; border-left:6px solid #2457d6">한웅</p>
+      <p style="flex:1; font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.45; color:#1f2329">AI를 활용해 서버를 구축하고 환경을 설정하는 과정에서 기술적으로 막히고 어려웠던 부분이 많았다.</p>
+      <p style="flex:1; font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.45; color:#1f2329">팀원들이 부족했던 부분을 적극적으로 도와주고 메꿔 준 덕분에, 무사히 문제를 해결하고 서버를 보수해 완성할 수 있었다.</p>
+    </div>
+    <div style="display:flex; flex-direction:row; gap:32px; padding:12px 0; border-top:2px solid #dedbd2">
+      <p style="width:140px; padding:0 0 0 16px; font-family:'Noto Sans KR', Arial, sans-serif; font-size:32px; font-weight:700; color:#1f2329; border-left:6px solid #d9480f">유나</p>
+      <p style="flex:1; font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.45; color:#1f2329">라즈봇 초기 설정과 오프라인 모임에서 핫스팟을 연결하는 과정이 어려웠다. 모터 커넥터를 잘못 연결해 라즈봇이 작동하지 않았고, 대전 모임에서는 집 Wi-Fi로 등록돼 있어 같은 이름으로 핫스팟을 켜도 연결되지 않았다.</p>
+      <p style="flex:1; font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.45; color:#1f2329">연결 상태를 점검하고 라즈봇을 다시 조립했다. 핫스팟은 결국 OS를 재설치하고 다시 등록했다. 다행히 GitHub에 그동안 작업한 내용을 정리해 둔 덕분에 서버 구축과 설정을 빠르게 복구할 수 있었다.</p>
+    </div>
+    <div style="display:flex; flex-direction:row; gap:32px; padding:12px 0; border-top:2px solid #dedbd2">
+      <p style="width:140px; padding:0 0 0 16px; font-family:'Noto Sans KR', Arial, sans-serif; font-size:32px; font-weight:700; color:#1f2329; border-left:6px solid #1e7a4c">채웅</p>
+      <p style="flex:1; font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.45; color:#1f2329">대시보드 디자인이 상당히 어려웠다. AI에게 시키면 이모지, 특이한 도형 등을 있는 대로 다 넣어서 보기 불쾌한 대시보드가 완성됐다.</p>
+      <p style="flex:1; font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.45; color:#1f2329">비슷한 사이트를 참고하고, 모든 AI에 디자이너 과장 역할을 줘서 피드백을 받았다. 그림판에 직접 그림을 그려 가며 배치도 조정해서 해결했다.</p>
+    </div>
+    <div style="display:flex; flex-direction:row; gap:32px; padding:12px 0; border-top:2px solid #dedbd2; border-bottom:2px solid #dedbd2">
+      <p style="width:140px; padding:0 0 0 16px; font-family:'Noto Sans KR', Arial, sans-serif; font-size:32px; font-weight:700; color:#1f2329; border-left:6px solid #8a5a00">채연</p>
+      <p style="flex:1; font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.45; color:#1f2329">아이디어를 구상할 때 사람의 신체를 기준으로 구상하다보니, 사람에게는 간단한 동작도 로봇에서는 구현하기 어려웠다. 로봇은 사람의 각 신체 기능에 해당하는 부품을 하나씩 따로 준비해야 한다는 한계가 있었다.</p>
+      <p style="flex:1; font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.45; color:#1f2329">이후 아이디어를 짤 때 먼저 키트 부품을 확인하고, 할 수 있는 동작만 남겨 아이디어를 짰다.</p>
+    </div>
+  </div>
+  <div style="position:absolute; right:128px; bottom:64px; left:128px; display:flex; flex-direction:row; justify-content:space-between">
+    <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; color:#8a909a">본인 글 · 담당 파트가 아니어도 프로젝트에서 막힌 곳</p>
+    <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; color:#8a909a">13</p>
+  </div>
+  
+</section>
+<section class="slide" id="feelings" data-transition="fade" style="display:flex; flex-direction:column; gap:48px; padding:128px 128px 160px; background:#1f2329">
+  <div style="display:flex; flex-direction:column; gap:16px">
+    <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#f08a5d">깨달은 점과 소감</p>
+    <h2 style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:72px; font-weight:700; line-height:1.15; color:#f3f1ec">프로젝트를 하면서 느낀 점</h2>
+  </div>
+  <div style="display:grid; gap:32px; grid-template-columns:1fr 1fr; grid-template-rows:1fr 1fr; flex:1">
+    <div style="display:flex; flex-direction:column; gap:12px; padding:28px 36px; background:#2a2f37; border-radius:20px">
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#f08a5d">한웅 · 중앙 서버, 웹캠 AI</p>
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.45; color:#f3f1ec">과제를 하며 피지컬 AI 기술이 실제로 어떻게 쓰이는지 체감했다. 이번에 다룬 감지와 제어 방식을 보며, 지금 관심 있는 농업 분야에 피지컬 AI를 접목해 스마트 농업 센서 시스템에 응용할 수 있겠다는 가능성을 느꼈다.</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px; padding:28px 36px; background:#2a2f37; border-radius:20px">
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#f08a5d">유나 · 로봇, 팀장</p>
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.45; color:#f3f1ec">수업에서 배운 내용을 미니프로젝트로 직접 구현해 볼 수 있었다. 오프라인 통합 때 라즈봇이 네트워크에 연결되지 않았지만, GitHub에 정리해 둔 작업 기록 덕분에 빠르게 복구했다. 작업 과정을 기록하고 관리하는 게 문제 해결에 큰 도움이 된다는 걸 배웠다.</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px; padding:28px 36px; background:#2a2f37; border-radius:20px">
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#f08a5d">채웅 · 웹 화면, 대시보드</p>
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.45; color:#f3f1ec">노션으로 계획을 세우고 GitHub로 역할을 나눠 작업하니, 서로의 영역을 침범하지 않고 맡은 역할을 효율적으로 끝낼 수 있었다. 바이브 코딩으로 머릿속 구상을 직접 실현해 보며 재미와 성취감을 느꼈고, 여기서 익힌 AI 활용 능력이 남들과 다른 경쟁력이 될 수 있겠다고 생각했다.</p>
+    </div>
+    <div style="display:flex; flex-direction:column; gap:12px; padding:28px 36px; background:#2a2f37; border-radius:20px">
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; font-weight:700; color:#f08a5d">채연 · 앱, 발표</p>
+      <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; line-height:1.45; color:#f3f1ec">로봇은 설계하는 것이 말로는 쉬워 보여도 실제로는 절대 쉽지 않았다. 말로는 1 → 2 → 3이지만, 프로그램은 1과 2 사이의 1.1, 1.21까지 챙겨야 맞물려 돌아간다. 그래도 여러 번 고친 끝에 생각한 대로 나왔을 때 뿌듯했다.</p>
+    </div>
+  </div>
+  <div style="position:absolute; right:128px; bottom:64px; left:128px; display:flex; flex-direction:row; justify-content:space-between">
+    <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; color:#8a909a">딴짓 보호 로봇 · 3팀</p>
+    <p style="font-family:'Noto Sans KR', Arial, sans-serif; font-size:24px; color:#8a909a">14</p>
+  </div>
+  
+</section>
+<section class="slide" id="closing" data-transition="fade" style="background:#1F2329;color:#F3F1EC;font-family:'Noto Sans KR', Arial, sans-serif;padding:128px;display:flex;flex-direction:column;justify-content:space-between">
+<div style="position:absolute;left:0;top:0;width:24px;height:1080px;background:#D9480F"></div>
+<p style="font-size:32px;color:#B4B9C2;font-weight:500">딴짓 보호 로봇 · 3팀</p>
+<div style="display:flex;flex-direction:column;gap:32px">
+<h1 style="font-size:120px;font-weight:900;line-height:1.1;letter-spacing:-2px">감사합니다</h1>
+<p style="font-size:44px;color:#F3F1EC">질문 받겠습니다</p>
+</div>
+<p style="font-size:32px;color:#B4B9C2">github.com/una8860-rgb/Team_Project-team3</p>
+
+</section>
+</div></div>
+<div id="notes" aria-live="polite"><h4>대본</h4><div id="ntext"></div></div>
+<div id="bar">
+<button id="prev" aria-label="이전 장">&lsaquo;</button><span id="num"></span><button id="next" aria-label="다음 장">&rsaquo;</button>
+<button id="nbtn" aria-pressed="false">대본</button><button id="pbtn">발표자 창</button><button id="fs">전체 화면</button>
+</div>
+<div id="pres">
+<div class="top"><span><b id="pnum"></b></span><span id="ptimer">00:00</span></div>
+<div id="ptext"></div>
+<div class="btns"><button id="pprev">이전</button><button id="pnextb">다음</button></div>
+</div>
+<div id="pnext"></div>
+<script>
+(function(){
+  var NOTES=["안녕하세요, 3팀 발표를 맡은 강채연입니다. 저희가 만든 로봇은 바로 딴짓 보호 로봇입니다.", "직장에서 딴짓을 하다가 누가 다가오면 어떻게 하시나요? 직장인의 월급 루팡을 지키려면 Alt + Tab(알트 탭)은 필수 스킬이죠. 하지만 계속 곁눈질을 해야 하고, 1초라도 판단이 늦으면 들키기 마련입니다. 쫄깃한 아슬아슬함은 덤이죠. 그래서 저희는 상사로부터 딴짓을 대신 지켜 주는 딴짓 보호 로봇을 만들었습니다. 상사가 다가오면 로봇이 먼저 알아채고, 화면을 숨겨 주고, 대신 인사를 합니다. 그러면 영상을 한 번 보여 드리겠습니다.", "(영상이 저절로 재생되고 소리 끄기) 자, 이런 식으로 노트북으로 딴짓을 하다가 팀원이 다가오면, 라즈봇이 감지해서 고개를 숙여 인사하고 짧은 율동을 합니다. 동시에 노트북 화면은 엑셀로 바뀌고 인사 음성이 나옵니다. 휴대폰 앱과 대쉬보드에도 알림이 오고 기록이 남는데, 그 부분은 뒤에서 따로 보여 드리겠습니다. 사람이 가면 모두 원래대로 돌아옵니다. 그럼 이 과정을 순서대로 설명하겠습니다. (소리 다시 키기)", "중앙 서버는 한웅님이 맡아 주셨습니다. 모든 기기는 가운데 서버 하나를 거쳐 연결됩니다. 서버는 파이썬의 Flask(플라스크)로 만들었고, 감지 기록은 SQLite(에스큐엘라이트)라는 작은 데이터베이스 파일에 저장합니다. 여러 기기가 동시에 물어봐도 기록이 꼬이지 않게 만들었습니다. 라즈봇이 사람을 감지하면 바로 인사하면서 서버에 기록을 보냅니다. 서버는 기록을 저장하고, 지금 사람이 있다고 상태를 바꿉니다. 웹 화면은 0.5초마다, 앱은 2초마다 서버에 물어봐서 바로 반응합니다. 주소와 요청 모양은 처음에 규격 문서로 정해 두고, 각자 그 규격에 맞춰 만들었습니다.", "(영상 끝나면 소리 끄기) 두 번째는 유나님이 맡은 로봇입니다. 라즈봇 카메라가 사람을 1초 이상 보면 인사를 시작하고, 서버에 \"사람 왔음\"을 보냅니다. 인사는 귀여운 치이카와 TTS(티티에스) 목소리로 대신 전달하고, 고개를 숙인 다음 짧은 율동을 합니다. 그리고 메모에 적은 것처럼, 로봇에 치이카와 얼굴을 붙여 귀엽게 만들었습니다.&nbsp;", "사람 감지에는 MobileNet-SSD(모바일넷 에스에스디)라는 가벼운 AI(에이아이) 모델을 썼습니다. 라즈베리파이에서도 돌아가도록 OpenCV(오픈씨브이)로 실행하고, 카메라 화면에서 사람인지만 판단합니다. 1초 이상 보이면 감지로 보고, 서보 모터를 2도씩 움직여 고개를 천천히 숙입니다. 카메라 영상은 저장하지 않고, 전원만 켜면 자동으로 실행됩니다.", "세 번째는 채웅님이 맡은 웹 화면과 대시보드입니다. 사람이 오면 엑셀 창이 맨 앞으로 뜹니다. 다른 프로그램을 쓰고 있어도 엑셀 팝업이 전체 화면으로 뜨고, 사람이 가면 하던 창으로 돌아갑니다. 엑셀은 그림이 아니라 실제로 입력과 수식 계산이 되고, 브라우저 탭 이름까지 바뀝니다.", "대시보드는 감지 기록을 큰 화면에서 보는 페이지입니다. 1번 숫자 카드에는 오늘 횟수와 지금 상태, 2번 타임라인에는 사람이 있던 구간, 3번에는 시간대별 그래프와 최근 7일 그래프가 나옵니다. 4번 버튼으로 날짜를 고르거나 크게 볼 수 있고, 아래쪽 기록 표는 엑셀로 내보낼 수 있습니다.", "위가 아무도 없을 때, 아래가 사람이 왔을 때입니다. 사람이 오면 2초 안에 네 군데가 바뀝니다. 알림이 뜨고, 상태가 \"사람 있음\"으로 바뀌고, 감지 횟수가 올라가고, 타임라인에 머무는 중 표시가 생깁니다.", "마지막 네 번째는 제가 만든 휴대폰 앱 언더커버입니다. 앱은 홈 화면과 기록 화면, 두 화면으로 나뉘어 있습니다. 지금 보고 있는 것은 홈 화면이며, 맨 위 카드가 지금의 상태를 보여 줍니다. 아무도 없으면 초록색이고, 누가 오면 2초 안에 주황색으로 \"누가 왔어요\"로 바뀌면서 알림이 뜹니다.", "다음으로 기록 화면에서는 언제 와서 얼마나 있었는지 방문 단위로 보입니다. 서버에 따로 저장된 \"왔음\", \"갔음\" 두 기록을 앱에서 방문 한 번으로 묶었습니다. 달력을 펼치면 날짜마다 방문 횟수가 나옵니다.", "저희 앱에는 특별하게 위장 모드가 있습니다. 앱 이름이 언더커버인 이유도 이 위장 모드 때문입니다. 위장은 모든 방면에서 철저하게 해야겠죠. 휴대폰을 보다가 누가 오면 휴대폰 화면도 들킬 수 있잖아요. 버튼 한 번이면 홈 화면과 기록 화면이 모두 업무 캘린더처럼 바뀝니다. 누가 와 있으면 \"회의 시작\", 왔다 가면 \"잠깐 미팅\"으로 보입니다. 다시 누르면 원래대로 돌아옵니다.", "만들면서 막혔던 곳도 있었습니다. 한웅님은 AI(에이아이)로 서버를 만들고 환경을 설정하면서 막히는 부분이 많았는데, 팀원들과 함께 해결했습니다. 유나님은 모터 커넥터를 잘못 연결해서 라즈봇이 안 움직였고, 오프라인에서는 핫스팟이 연결되지 않았습니다. 다시 조립하고 OS(오에스)를 재설치했는데, GitHub(깃허브)에 기록을 정리해 둔 덕분에 빠르게 복구할 수 있었습니다. 채웅님은 AI(에이아이)에게 디자인을 맡기면 이모지가 가득한 화면이 나와서, 비슷한 사이트를 참고하고 그림판으로 배치를 직접 그려 해결했습니다. 저는 사람 몸을 기준으로 아이디어를 짜다 보니 키트로는 만들기 어려운 게 많았습니다. 그래서 이후에는 키트 부품을 확인하고 어떤 기능이 구현 가능한 지 생각한 후 아이디어를 짰습니다.", "마지막으로 이 프로젝트를 하면서 느낀 점입니다.&nbsp;<br><br>한웅님은 이번에 다룬 감지와 제어 방식을 보면서, 지금 관심 있는 농업 분야에 피지컬 AI(에이아이)를 접목해 스마트 농업 센서 시스템에 응용할 수 있겠다는 가능성을 느꼈습니다.<br>&nbsp;<br>유나님은 오프라인 통합 때 라즈봇이 네트워크에 연결되지 않았지만 GitHub(깃허브)에 정리해 둔 작업 기록 덕분에 빠르게 복구할 수 있었고, 이 일로 작업 과정을 기록하고 관리하는 게 문제 해결에 큰 도움이 된다는 걸 배웠습니다.<br>&nbsp;<br>채웅님은 노션으로 계획을 세우고 GitHub(깃허브)로 역할을 나눠 작업하니, 서로의 영역을 침범하지 않고 맡은 역할을 효율적으로 끝낼 수 있었다고 합니다. 또 바이브 코딩으로 머릿속 구상을 직접 실현해 보며 재미와 성취감을 느꼈고, 여기서 익힌 AI(에이아이) 활용 능력이 남들과 다른 경쟁력이 될 수 있겠다고 생각했습니다.&nbsp;<br><br>마지막으로 저는 로봇을 설계하는 게 말로는 쉬워 보여도 실제로는 절대 쉽지 않다는 걸 느꼈습니다. 말로는 1에서 2, 3으로 넘어가면 되지만, 프로그램은 1과 2 사이의 1.1, 1.21까지 챙겨야 맞물려 돌아갑니다. 그래도 여러 번 고친 끝에 생각한 대로 나왔을 때 정말 뿌듯했습니다.", "정리하면, 저희는 사람이 다가오면 로봇이 먼저 알아채고, 화면을 숨기고, 대신 인사하는 딴짓 보호 로봇을 만들었습니다. 코드와 문서는 GitHub(깃허브)에 공개되어 있습니다. 들어 주셔서 감사합니다. 질문 받겠습니다."];
+  var presenter=/[?&]view=presenter/.test(location.search);
+  if(presenter)document.body.classList.add('presenter');
+  var view=document.getElementById('view'), stage=document.getElementById('stage');
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var n=slides.length, cur=0;
+  var ch=null; try{ch=new BroadcastChannel('ddanjit-deck');}catch(e){}
+  function $(id){return document.getElementById(id);}
+  function fit(){
+    var w=view.clientWidth,h=view.clientHeight;
+    var s=Math.min(w/1920,h/1080);
+    stage.style.transform='scale('+s+') translate(-50%,-50%)';
+  }
+  function titleOf(i){
+    var t=slides[i]&&slides[i].querySelector('h1,h2');
+    return t?t.textContent.trim():'';
+  }
+  // 장에 들어오면 영상은 처음 화면에서 멈춰 있고, 눌러야 재생됨
+  function playIn(sl){
+    sl.querySelectorAll('video').forEach(function(v){
+      if(presenter)v.muted=true;
+      v.pause();
+      if(v.currentTime>0){try{v.currentTime=0;}catch(e){}}
+    });
+  }
+  document.querySelectorAll('.vwrap').forEach(function(w){
+    var v=w.querySelector('video');
+    if(presenter)v.muted=true;
+    v.addEventListener('play',function(){w.classList.add('playing');});
+    v.addEventListener('pause',function(){w.classList.remove('playing');});
+    w.querySelector('.vplay').addEventListener('click',function(e){e.stopPropagation();v.play();});
+  });
+  function show(i,from){
+    i=Math.max(0,Math.min(n-1,i));
+    if(i!==cur){
+      slides[cur].classList.remove('on');
+      slides[cur].querySelectorAll('video').forEach(function(v){v.pause();});
+    }
+    cur=i;
+    slides[cur].classList.add('on');
+    playIn(slides[cur]);
+    $('num').textContent=(cur+1)+' / '+n;
+    $('prog').style.width=((cur+1)/n*100)+'%';
+    $('ntext').innerHTML=NOTES[cur]||'<span style="color:#8A909A">대본 없음</span>';
+    $('pnum').textContent=(cur+1)+' / '+n;
+    $('ptext').innerHTML=NOTES[cur]||'<span style="color:#8A909A">대본 없음</span>';
+    $('ptext').scrollTop=0;
+    $('pnext').textContent=cur<n-1?('다음 장: '+titleOf(cur+1)):'마지막 장';
+    if(!presenter)history.replaceState(null,'','#'+(cur+1));
+    if(ch&&from!=='remote')ch.postMessage({i:cur});
+  }
+  function go(i){show(i);}
+  if(ch)ch.onmessage=function(e){if(e.data&&typeof e.data.i==='number')show(e.data.i,'remote');};
+  function toggleFs(){
+    if(document.fullscreenElement)document.exitFullscreen();
+    else if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen();
+  }
+  function toggleNotes(){
+    var on=$('notes').classList.toggle('open');
+    $('nbtn').setAttribute('aria-pressed',on?'true':'false');
+  }
+  function openPresenter(){
+    window.open(location.pathname+'?view=presenter#'+(cur+1),'ddanjit-presenter','width=1280,height=760');
+  }
+  addEventListener('resize',fit);
+  addEventListener('keydown',function(e){
+    var k=e.key;
+    if(k==='ArrowRight'||k==='ArrowDown'||k==='PageDown'||k===' '||k==='Enter'){e.preventDefault();go(cur+1);}
+    else if(k==='ArrowLeft'||k==='ArrowUp'||k==='PageUp'||k==='Backspace'){e.preventDefault();go(cur-1);}
+    else if(k==='Home')go(0);
+    else if(k==='End')go(n-1);
+    else if(k==='f'||k==='F'){if(!presenter)toggleFs();}
+    else if(k==='n'||k==='N'){if(!presenter)toggleNotes();}
+    else if(k==='p'||k==='P'){if(!presenter)openPresenter();}
+  });
+  view.addEventListener('click',function(e){
+    if(e.target.closest('.vwrap'))return;
+    var r=view.getBoundingClientRect();
+    go(e.clientX-r.left<r.width/3?cur-1:cur+1);
+  });
+  var tx=null;
+  view.addEventListener('touchstart',function(e){tx=e.touches[0].clientX;},{passive:true});
+  view.addEventListener('touchend',function(e){
+    if(tx===null)return;
+    var dx=e.changedTouches[0].clientX-tx;tx=null;
+    if(Math.abs(dx)>40)go(dx<0?cur+1:cur-1);
+  });
+  $('prev').onclick=function(){go(cur-1);};
+  $('next').onclick=function(){go(cur+1);};
+  $('nbtn').onclick=toggleNotes;
+  $('pbtn').onclick=openPresenter;
+  $('fs').onclick=toggleFs;
+  $('pprev').onclick=function(){go(cur-1);};
+  $('pnextb').onclick=function(){go(cur+1);};
+  if(presenter){
+    var t0=Date.now();
+    setInterval(function(){
+      var s=Math.floor((Date.now()-t0)/1000);
+      $('ptimer').textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');
+    },1000);
+  }
+  fit();
+  var h=parseInt(location.hash.slice(1),10);
+  show(isNaN(h)?0:h-1,presenter?undefined:'remote');
+})();
+</script>
+</body>
+</html>
