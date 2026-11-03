@@ -71,3 +71,4 @@ $env:SERVER_HOST="<서버 IP>"; streamlit run src/app/app.py
 - 10/31: 앱 화면 설계 확정(언더커버, 위장 모드), 새 화면으로 앱 다시 만듦, 샘플 데이터로 시험 완료
 - 11/1: 시간 12시간제, 위장 기록을 솔직 기록과 같은 화면으로 통일, 위장 홈 일정표 오른쪽 여백, 주황 점 깜빡임
 - 11/1: 앱 README 를 그림 위주로 다시 만듦 (대표 배너, 실제 앱 조작 GIF 2개 `src/app/design/readme/`, Mermaid 흐름도 4개)
+- 11/3: 최종 발표 자료를 `src/app/presentation/` 에 올림 (웹 발표 화면, 대본). 웹 주소 https://ddanjit-robot-team3.vercel.app
