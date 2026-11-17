@@ -72,3 +72,4 @@ $env:SERVER_HOST="<서버 IP>"; streamlit run src/app/app.py
 - 11/1: 시간 12시간제, 위장 기록을 솔직 기록과 같은 화면으로 통일, 위장 홈 일정표 오른쪽 여백, 주황 점 깜빡임
 - 11/1: 앱 README 를 그림 위주로 다시 만듦 (대표 배너, 실제 앱 조작 GIF 2개 `src/app/design/readme/`, Mermaid 흐름도 4개)
 - 11/3: 최종 발표 자료를 `docs/presentation/` 에 올림 (웹 발표 화면, 대본). 웹 주소 https://ddanjit-robot-team3.vercel.app
+- 11/17: GitHub 계정 변경 (kangchaeyeon82 정지 -> lil-kangi). 이후 커밋은 lil-kangi 로 올림
